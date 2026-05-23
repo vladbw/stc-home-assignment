@@ -11,9 +11,7 @@
     "dev:frontend": "npm run dev -w frontend",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "format": "prettier --write .",
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

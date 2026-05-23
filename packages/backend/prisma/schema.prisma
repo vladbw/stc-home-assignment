@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Presentation {
+  id        String   @id @default(uuid())
+  title     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pages     Page[]
+}
+
+model Page {
+  id              String        @id @default(uuid())
+  presentationId  String
+  presentation    Presentation  @relation(fields: [presentationId], references: [id], onDelete: Cascade)
+  order           Int
+  backgroundColor String        @default("#FFFFFF")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  content         ContentItem[]
+
+  @@index([presentationId])
+}
+
+model ContentItem {
+  id        String      @id @default(uuid())
+  pageId    String
+  page      Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type      ContentType
+  x         Float
+  y         Float
+  width     Float
+  height    Float
+  zIndex    Int         @default(0)
+  text      String?
+  style     Json?
+  mediaId   String?
+  media     Media?      @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([pageId])
+}
+
+enum ContentType {
+  text
+  image
+  video
+}
+
+model Media {
+  id               String        @id @default(uuid())
+  s3Key            String        @unique
+  contentType      String
+  size             Int
+  status           MediaStatus   @default(pending)
+  originalFilename String
+  createdAt        DateTime      @default(now())
+  uploadedAt       DateTime?
+  contentItems     ContentItem[]
+
+  @@index([status, contentType])
+}
+
+enum MediaStatus {
+  pending
+  uploaded
+  failed
+}

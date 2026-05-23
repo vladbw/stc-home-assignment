@@ -7,15 +7,24 @@
     "dev": "tsx watch --env-file=../../.env src/index.ts",
     "build": "tsc",
     "start": "node --env-file=../../.env dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:reset": "dotenv -e ../../.env -- prisma migrate reset",
+    "db:generate": "prisma generate",
+    "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
+    "db:studio": "dotenv -e ../../.env -- prisma studio"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
+    "@prisma/client": "^6.1.0",
     "@sts/shared": "*",
     "fastify": "^5.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.4",
+    "prisma": "^6.1.0",
     "tsx": "^4.19.2"
   }
 }

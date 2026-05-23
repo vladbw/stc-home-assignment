@@ -6,8 +6,9 @@ Full-stack TypeScript app for creating and editing presentations.
 
 - **Backend** — Node.js + TypeScript + Fastify + Prisma + Zod
 - **Frontend** — React + Vite + TypeScript + TanStack Query + Zustand + @dnd-kit
-- **Database** — Postgres (via docker-compose)
+- **Database** — Postgres on [Neon](https://neon.tech) (serverless)
 - **Storage** — AWS S3 with presigned URLs
+- **Hosting** — Frontend on Vercel, backend on Render
 
 ## Repo layout
 
@@ -17,7 +18,6 @@ sts-project/
 │   ├── shared/      # Zod schemas + shared types
 │   ├── backend/     # Fastify API
 │   └── frontend/    # React SPA
-├── docker-compose.yml
 └── README.md
 ```
 
@@ -28,14 +28,15 @@ _Detailed instructions land in phase 13. The notes below are enough to get the s
 ### Prerequisites
 
 - Node.js 20+
-- Docker (for Postgres)
+- A Neon Postgres project ([sign up](https://neon.tech))
+- An AWS account + S3 bucket (for phase 9 onward)
 
 ### Quickstart
 
 ```bash
 npm install
 cp .env.example .env
-npm run db:up           # starts Postgres
+# Fill DATABASE_URL with your Neon connection string
 npm run dev             # starts backend + frontend
 ```
 
