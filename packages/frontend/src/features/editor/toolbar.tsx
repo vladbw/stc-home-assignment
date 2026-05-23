@@ -33,6 +33,9 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
 
   const handleAddText = () => {
     if (!activePage) return;
+    // width/height are legacy fields for text items — the displayed box
+    // hugs the rendered text, derived from content + fontSize. The values
+    // here are just to satisfy the schema; they're not used for rendering.
     create.mutate(
       {
         pageId: activePage.id,
@@ -40,8 +43,8 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
           type: 'text',
           x: 100,
           y: 100,
-          width: 400,
-          height: 80,
+          width: 100,
+          height: 40,
           text: 'Text',
           style: DEFAULT_TEXT_STYLE,
         },

@@ -1,9 +1,20 @@
-import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react';
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
+  DEFAULT_TEXT_STYLE,
+  MAX_FONT_SIZE,
+  MIN_FONT_SIZE,
   type ContentResponse,
   type PageResponse,
+  type TextStyle,
 } from '@sts/shared';
 import { useUpdateContent } from '../../queries/content';
 import { useEditorStore } from '../../stores/editor-store';
@@ -73,6 +84,20 @@ type ItemProps = {
   presentationId: string;
 };
 
+/** Resolve the full style with defaults filled in for legacy / partial style data. */
+function resolveStyle(item: ContentResponse): TextStyle {
+  return {
+    bold: item.style?.bold ?? DEFAULT_TEXT_STYLE.bold,
+    italic: item.style?.italic ?? DEFAULT_TEXT_STYLE.italic,
+    color: item.style?.color ?? DEFAULT_TEXT_STYLE.color,
+    fontSize: item.style?.fontSize ?? DEFAULT_TEXT_STYLE.fontSize,
+  };
+}
+
+function clampFontSize(n: number): number {
+  return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, Math.round(n)));
+}
+
 function ContentItemView({ item, scale, presentationId }: ItemProps) {
   const selectedId = useEditorStore((s) => s.selectedContentId);
   const editingId = useEditorStore((s) => s.editingContentId);
@@ -81,38 +106,96 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
 
   const isSelected = selectedId === item.id;
   const isEditing = editingId === item.id;
+  const isText = item.type === 'text';
 
   const update = useUpdateContent(presentationId);
+  const currentStyle = resolveStyle(item);
+
+  const itemDomRef = useRef<HTMLDivElement>(null);
+  // For text items, the *displayed* size is determined by content + fontSize
+  // (the box hugs the text). The drag/resize math needs to know the real
+  // pixel dimensions, so we measure them via offsetWidth/offsetHeight after
+  // every render that could affect them.
+  // For media items we just trust the stored width/height.
+  const [renderedSize, setRenderedSize] = useState<{ w: number; h: number }>(() => ({
+    w: item.width,
+    h: item.height,
+  }));
+
+  useLayoutEffect(() => {
+    if (!isText) {
+      setRenderedSize({ w: item.width, h: item.height });
+      return;
+    }
+    const el = itemDomRef.current;
+    if (!el) return;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    if (w > 0 && h > 0) setRenderedSize({ w, h });
+  }, [
+    isText,
+    item.text,
+    item.width,
+    item.height,
+    currentStyle.fontSize,
+    currentStyle.bold,
+    currentStyle.italic,
+  ]);
 
   const { dragging, delta, handlers: dragHandlers } = useDrag({
     scale,
     onCommit: ({ dx, dy }) => {
-      const nextX = Math.max(0, Math.min(CANVAS_WIDTH - item.width, item.x + dx));
-      const nextY = Math.max(0, Math.min(CANVAS_HEIGHT - item.height, item.y + dy));
-      if (nextX === item.x && nextY === item.y) return;
+      const w = renderedSize.w;
+      const h = renderedSize.h;
+      const nextX = Math.max(0, Math.min(CANVAS_WIDTH - w, item.x + dx));
+      const nextY = Math.max(0, Math.min(CANVAS_HEIGHT - h, item.y + dy));
+      if (Math.round(nextX) === Math.round(item.x) && Math.round(nextY) === Math.round(item.y))
+        return;
       update.mutate({ id: item.id, input: { x: nextX, y: nextY } });
     },
   });
 
   const { transient: resizeT, handlersFor: makeResizeHandlers } = useResize({
-    item: { x: item.x, y: item.y, width: item.width, height: item.height },
+    // Pass the measured/displayed size as the resize starting box — for text
+    // this is the rendered text bounds, not the stale stored width/height.
+    item: { x: item.x, y: item.y, width: renderedSize.w, height: renderedSize.h },
     scale,
     onCommit: ({ x, y, width, height }) => {
-      // Clamp to canvas bounds — never let the item extend past the page.
-      const clampedW = Math.min(width, CANVAS_WIDTH);
-      const clampedH = Math.min(height, CANVAS_HEIGHT);
-      const clampedX = Math.max(0, Math.min(CANVAS_WIDTH - clampedW, x));
-      const clampedY = Math.max(0, Math.min(CANVAS_HEIGHT - clampedH, y));
-      update.mutate({
-        id: item.id,
-        input: { x: clampedX, y: clampedY, width: clampedW, height: clampedH },
-      });
+      if (isText) {
+        // Scale factor between the new geometric box and the starting one.
+        // Apply it to fontSize. Text + fontSize then determines the *actual*
+        // rendered box; the geometric x / y still anchor the box correctly
+        // because the resize math kept the opposite corner fixed.
+        const startW = Math.max(1, renderedSize.w);
+        const scaleFactor = width / startW;
+        const newFontSize = clampFontSize(currentStyle.fontSize * scaleFactor);
+        if (newFontSize === currentStyle.fontSize && Math.round(x) === Math.round(item.x) && Math.round(y) === Math.round(item.y)) {
+          return;
+        }
+        update.mutate({
+          id: item.id,
+          input: {
+            x: Math.round(x),
+            y: Math.round(y),
+            style: { ...currentStyle, fontSize: newFontSize },
+          },
+        });
+      } else {
+        const clampedW = Math.min(width, CANVAS_WIDTH);
+        const clampedH = Math.min(height, CANVAS_HEIGHT);
+        const clampedX = Math.max(0, Math.min(CANVAS_WIDTH - clampedW, x));
+        const clampedY = Math.max(0, Math.min(CANVAS_HEIGHT - clampedH, y));
+        update.mutate({
+          id: item.id,
+          input: { x: clampedX, y: clampedY, width: clampedW, height: clampedH },
+        });
+      }
     },
   });
 
   // While editing a text item, render the textarea overlay instead.
-  if (item.type === 'text' && isEditing) {
-    return <TextEditView item={item} presentationId={presentationId} />;
+  if (isText && isEditing) {
+    return <TextEditView item={item} presentationId={presentationId} style={currentStyle} />;
   }
 
   const onPointerDownItem = (e: React.PointerEvent<HTMLElement>) => {
@@ -122,7 +205,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
   };
 
   const onDoubleClick = (e: React.MouseEvent) => {
-    if (item.type !== 'text') return;
+    if (!isText) return;
     e.stopPropagation();
     beginEdit(item.id);
   };
@@ -130,8 +213,17 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
   // Live geometry: resize transient takes precedence over drag delta.
   const liveX = resizeT?.x ?? item.x + delta.dx;
   const liveY = resizeT?.y ?? item.y + delta.dy;
-  const liveW = resizeT?.width ?? item.width;
-  const liveH = resizeT?.height ?? item.height;
+
+  // For text: derive live fontSize from the projection scale during resize.
+  // For media: width/height come straight from the transient.
+  const liveFontSize = (() => {
+    if (!isText) return undefined;
+    if (resizeT && renderedSize.w > 0) {
+      const scaleFactor = resizeT.width / renderedSize.w;
+      return clampFontSize(currentStyle.fontSize * scaleFactor);
+    }
+    return currentStyle.fontSize;
+  })();
 
   const isInteracting = dragging || resizeT !== null;
 
@@ -139,42 +231,40 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
     position: 'absolute',
     left: liveX,
     top: liveY,
-    width: liveW,
-    height: liveH,
     zIndex: isInteracting ? 9999 : item.zIndex,
     cursor: dragging ? 'grabbing' : 'grab',
+    ...(isText
+      ? {} // no fixed width/height — box hugs the text content
+      : {
+          width: resizeT?.width ?? item.width,
+          height: resizeT?.height ?? item.height,
+        }),
   };
 
   const className = `${styles.contentItem} ${isSelected ? styles.contentItemSelected : ''}`;
 
-  // Handles render outside the item's content (negative offset), so they sit
-  // on the edge of the selection ring. They sit *inside* the item's DOM tree
-  // so they get the same canvas-space transform; we scale their pixel size
-  // by 1/scale so they always look ~14px on screen.
   const showHandles = isSelected && !isEditing;
   const handleSize = 14 / scale;
 
-  const body =
-    item.type === 'text' ? (
-      <div
-        className={styles.contentText}
-        style={{
-          width: '100%',
-          height: '100%',
-          fontWeight: item.style?.bold ? 700 : 400,
-          fontStyle: item.style?.italic ? 'italic' : 'normal',
-          color: item.style?.color ?? '#000000',
-          pointerEvents: 'none',
-        }}
-      >
-        {item.text}
-      </div>
-    ) : (
-      <span style={{ pointerEvents: 'none' }}>[{item.type}]</span>
-    );
+  const body = isText ? (
+    <div
+      className={styles.contentText}
+      style={{
+        fontSize: liveFontSize,
+        fontWeight: currentStyle.bold ? 700 : 400,
+        fontStyle: currentStyle.italic ? 'italic' : 'normal',
+        color: currentStyle.color,
+      }}
+    >
+      {item.text || ' '}
+    </div>
+  ) : (
+    <span style={{ pointerEvents: 'none' }}>[{item.type}]</span>
+  );
 
   return (
     <div
+      ref={itemDomRef}
       className={className}
       style={baseStyle}
       onPointerDown={onPointerDownItem}
@@ -182,7 +272,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
       onPointerUp={dragHandlers.onPointerUp}
       onPointerCancel={dragHandlers.onPointerCancel}
       onDoubleClick={onDoubleClick}
-      title={item.type === 'text' ? undefined : `${item.type} (phase 9)`}
+      title={isText ? undefined : `${item.type} (phase 9)`}
     >
       {body}
       {showHandles && (
@@ -226,26 +316,54 @@ function ResizeHandleView({
 
 /**
  * Inline text editor. Mounted in place of the read-only text div while the
- * item is being edited. Saves on blur, Escape cancels.
+ * item is being edited.
+ *
+ * Persistence is driven by the unmount cleanup, NOT by `onBlur`. This is
+ * necessary because the parent unmounts this component synchronously when
+ * the user does any of: click another content item, click outside the page,
+ * change pages, navigate away. None of those cause the browser to fire a
+ * blur event before the textarea is gone — relying on blur alone would drop
+ * the user's edits in every one of those cases.
+ *
+ * The textarea auto-sizes to its content via `field-sizing: content`
+ * (supported in modern Chromium / Safari; Firefox falls back gracefully).
  */
 function TextEditView({
   item,
   presentationId,
+  style,
 }: {
   item: ContentResponse;
   presentationId: string;
+  style: TextStyle;
 }) {
   const endEdit = useEditorStore((s) => s.endEdit);
   const update = useUpdateContent(presentationId);
-  const cancelledRef = useRef(false);
 
-  const onBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    const value = e.currentTarget.value;
-    const cancelled = cancelledRef.current;
-    cancelledRef.current = false;
-    if (!cancelled && value !== (item.text ?? '')) {
-      update.mutate({ id: item.id, input: { text: value } });
-    }
+  const draftRef = useRef(item.text ?? '');
+  const cancelledRef = useRef(false);
+  const itemRef = useRef(item);
+  itemRef.current = item;
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
+  useEffect(() => {
+    return () => {
+      const value = draftRef.current;
+      if (!cancelledRef.current && value !== (itemRef.current.text ?? '')) {
+        updateRef.current.mutate({
+          id: itemRef.current.id,
+          input: { text: value },
+        });
+      }
+    };
+  }, []);
+
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    draftRef.current = e.target.value;
+  };
+
+  const onBlur = () => {
     endEdit();
   };
 
@@ -253,7 +371,7 @@ function TextEditView({
     if (e.key === 'Escape') {
       e.preventDefault();
       cancelledRef.current = true;
-      e.currentTarget.blur();
+      endEdit();
     }
   };
 
@@ -261,6 +379,7 @@ function TextEditView({
     <textarea
       autoFocus
       defaultValue={item.text ?? ''}
+      onChange={onChange}
       onBlur={onBlur}
       onKeyDown={onKeyDown}
       onPointerDown={(e) => e.stopPropagation()}
@@ -269,12 +388,11 @@ function TextEditView({
       style={{
         left: item.x,
         top: item.y,
-        width: item.width,
-        height: item.height,
         zIndex: 9999,
-        fontWeight: item.style?.bold ? 700 : 400,
-        fontStyle: item.style?.italic ? 'italic' : 'normal',
-        color: item.style?.color ?? '#000000',
+        fontSize: style.fontSize,
+        fontWeight: style.bold ? 700 : 400,
+        fontStyle: style.italic ? 'italic' : 'normal',
+        color: style.color,
       }}
     />
   );

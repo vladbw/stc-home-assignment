@@ -104,7 +104,10 @@
   position: absolute;
   cursor: grab;
   touch-action: none; /* let Pointer Events drive the drag, not browser pan/zoom */
-  /* width/height/x/y set inline based on data */
+  /* For text items we leave width/height unset so the box hugs the rendered
+     text. For media items we set them inline (intrinsic dimensions matter). */
+  min-width: 12px;
+  min-height: 12px;
 }
 
 .contentItemSelected {
@@ -114,8 +117,9 @@
 
 .contentText {
   white-space: pre-wrap;
-  overflow: hidden;
   user-select: none;
+  pointer-events: none;
+  /* font-size / weight / style / color come from the item's TextStyle. */
 }
 
 /* Toolbar -------------------------------------------------------------- */
@@ -175,16 +179,20 @@
 
 .contentTextEditing {
   position: absolute;
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
   border: 2px dashed #007aff;
   padding: 0;
   margin: 0;
   resize: none;
-  font: inherit;
+  font: inherit; /* inherits font-family; we override size/weight/style inline */
   outline: none;
   box-sizing: border-box;
-  overflow: auto;
   white-space: pre-wrap;
+  /* Auto-size to content where supported (Chrome/Edge/Safari modern). On
+     Firefox we fall back to the textarea's natural size. */
+  field-sizing: content;
+  min-width: 40px;
+  min-height: 24px;
 }
 
 /* Resize handles ------------------------------------------------------- */
