@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { PresentationListItem } from '@sts/shared';
 import toast from 'react-hot-toast';
@@ -86,6 +86,7 @@ function ListView() {
 function PresentationCard({ presentation }: { presentation: PresentationListItem }) {
   const [renaming, setRenaming] = useState(false);
   const [draftTitle, setDraftTitle] = useState(presentation.title);
+  const cardRef = useRef<HTMLFormElement>(null);
   const rename = useRenamePresentation();
   const remove = useDeletePresentation();
 
@@ -93,6 +94,19 @@ function PresentationCard({ presentation }: { presentation: PresentationListItem
     setRenaming(false);
     setDraftTitle(presentation.title);
   };
+
+  useEffect(() => {
+    if (!renaming) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!(e.target instanceof Node)) return;
+      if (cardRef.current?.contains(e.target)) return;
+      cancelRename();
+    };
+
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [renaming, presentation.title]);
 
   const onRenameSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -114,7 +128,7 @@ function PresentationCard({ presentation }: { presentation: PresentationListItem
 
   if (renaming) {
     return (
-      <form onSubmit={onRenameSubmit} className={styles.card}>
+      <form ref={cardRef} onSubmit={onRenameSubmit} className={styles.card}>
         <input
           autoFocus
           value={draftTitle}

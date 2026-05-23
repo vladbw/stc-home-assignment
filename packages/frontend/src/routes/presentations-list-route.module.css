@@ -15,6 +15,14 @@
   font: inherit;
 }
 
+.main button:not(:disabled) {
+  cursor: pointer;
+}
+
+.main button:disabled {
+  cursor: not-allowed;
+}
+
 .list {
   list-style: none;
   padding: 0;
