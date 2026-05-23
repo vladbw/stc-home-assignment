@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePresentationDetail } from '../queries/presentations';
-import { Canvas } from '../features/editor/canvas';
-import { PageSidebar } from '../features/editor/page-sidebar';
+import { EditorHeader } from '../features/editor/editor-header';
+import { EditorWorkspace } from '../features/editor/editor-workspace';
 import { Toolbar } from '../features/editor/toolbar';
 import { useEditorKeybindings } from '../features/editor/use-editor-keybindings';
 import { buttonVariants } from '../components/ui/button';
@@ -25,16 +25,13 @@ export function EditorRoute() {
   useEffect(() => {
     reset();
     clearHistory();
-
     return () => {
       reset();
       clearHistory();
     };
   }, [id, reset, clearHistory]);
 
-  // Keep the active page id valid against the latest data. If the current
-  // active page disappears (e.g. just deleted, or we just navigated to a
-  // presentation that doesn't contain that page), fall back to the first.
+  // Keep the active page id valid against the latest data.
   useEffect(() => {
     if (!presentation) return;
     const stillExists = presentation.pages.some((p) => p.id === activePageId);
@@ -44,6 +41,11 @@ export function EditorRoute() {
   }, [presentation, activePageId, setActivePage]);
 
   useEditorKeybindings(id, presentation);
+
+  // Track previous-id so we only reset *between* presentations, not on every
+  // mount. Used by the cleanup logic above (which also fires on actual unmount).
+  const prevIdRef = useRef(id);
+  prevIdRef.current = id;
 
   if (isLoading) {
     return (
@@ -75,29 +77,13 @@ export function EditorRoute() {
 
   return (
     <PageShell className="grid h-screen grid-rows-[auto_auto_1fr] overflow-hidden">
-      <header className="flex items-center gap-3 border-b border-border bg-panel-raised px-4 py-3">
-        <Link to="/" className={buttonVariants({ size: 'icon', variant: 'secondary' })}>
-          ←
-        </Link>
-        <h1 className="min-w-0 flex-1 truncate text-base font-semibold text-foreground">
-          {presentation.title}
-        </h1>
-        <Link
-          to={`/presentations/${presentation.id}/present`}
-          className={buttonVariants({ variant: 'primary' })}
-        >
-          ▶ Present
-        </Link>
-      </header>
+      <EditorHeader presentation={presentation} />
       <Toolbar
         presentationId={presentation.id}
         activePage={activePage}
         selectedItem={selectedItem}
       />
-      <div className="grid min-h-0 grid-cols-[minmax(160px,220px)_1fr] overflow-hidden">
-        <PageSidebar presentation={presentation} />
-        <Canvas page={activePage} presentationId={presentation.id} />
-      </div>
+      <EditorWorkspace presentation={presentation} activePage={activePage} />
     </PageShell>
   );
 }

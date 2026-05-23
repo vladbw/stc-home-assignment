@@ -1,100 +1,78 @@
-import { useEffect } from 'react';
 import { MAX_PAGES_PER_PRESENTATION, type PresentationDetail } from '@sts/shared';
 import { useAddPage } from '../../queries/pages';
+import { useShortcut } from '../../shortcuts/use-shortcut';
 import { useEditorStore } from '../../stores/editor-store';
-import { isPlainModShortcut, isTypingTarget } from '../../utils/keyboard';
+import { useHistoryStore } from '../../stores/history-store';
 import { useEditorActions } from './use-editor-actions';
 
+/**
+ * Registers every editor shortcut in one place. Each call to `useShortcut`
+ * looks up the chord/scope/repeat behavior from the central registry, so
+ * the only thing here is which handlers run.
+ */
 export function useEditorKeybindings(
   presentationId: string | undefined,
   presentation: PresentationDetail | undefined,
 ) {
   const activePageId = useEditorStore((s) => s.activePageId);
   const setActivePage = useEditorStore((s) => s.setActivePage);
-  const { redo, undo } = useEditorActions(presentationId ?? '');
+  const selectedContentId = useEditorStore((s) => s.selectedContentId);
+  const selectContent = useEditorStore((s) => s.selectContent);
+
+  const actions = useEditorActions(presentationId ?? '');
+  const canUndo = useHistoryStore((s) => s.undoStack.length > 0);
+  const canRedo = useHistoryStore((s) => s.redoStack.length > 0);
   const { isPending: isAddingPage, mutate: addPage } = useAddPage(presentationId ?? '');
 
-  useEffect(() => {
-    if (!presentationId) return;
+  const pageCount = presentation?.pages.length ?? 0;
+  const atMaxPages = pageCount >= MAX_PAGES_PER_PRESENTATION;
 
-    const createPage = () => {
-      if (
-        isAddingPage ||
-        (presentation?.pages.length ?? 0) >= MAX_PAGES_PER_PRESENTATION
-      ) {
-        return;
-      }
+  const createPage = () => {
+    if (!presentationId || isAddingPage || atMaxPages) return;
+    addPage(undefined, { onSuccess: (newPage) => setActivePage(newPage.id) });
+  };
 
-      addPage(undefined, {
-        onSuccess: (newPage) => setActivePage(newPage.id),
-      });
-    };
+  const navigatePage = (direction: -1 | 1) => {
+    if (!presentation || presentation.pages.length === 0) return;
+    const currentIndex = presentation.pages.findIndex((p) => p.id === activePageId);
+    const fallback = currentIndex >= 0 ? currentIndex : 0;
+    const nextIndex = Math.max(
+      0,
+      Math.min(presentation.pages.length - 1, fallback + direction),
+    );
+    const nextPageId = presentation.pages[nextIndex]?.id ?? null;
+    if (nextPageId && nextPageId !== activePageId) {
+      setActivePage(nextPageId);
+    }
+  };
 
-    const navigatePage = (direction: -1 | 1) => {
-      const pages = presentation?.pages ?? [];
-      if (pages.length === 0) return;
+  const deleteSelected = () => {
+    if (!presentation || !selectedContentId) return;
+    const page = presentation.pages.find((p) => p.id === activePageId);
+    const item = page?.content.find((c) => c.id === selectedContentId);
+    if (!item) return;
+    actions.removeContent(item);
+    selectContent(null);
+  };
 
-      const currentIndex = pages.findIndex((p) => p.id === activePageId);
-      const fallbackIndex = currentIndex >= 0 ? currentIndex : 0;
-      const nextIndex = Math.max(
-        0,
-        Math.min(pages.length - 1, fallbackIndex + direction),
-      );
-      const nextPageId = pages[nextIndex]?.id ?? null;
+  const deselect = () => {
+    if (!selectedContentId) return;
+    selectContent(null);
+  };
 
-      if (nextPageId && nextPageId !== activePageId) {
-        setActivePage(nextPageId);
-      }
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (isTypingTarget(e.target)) return;
-
-      if (isPlainModShortcut(e)) {
-        const key = e.key.toLowerCase();
-        if (key === 'n') {
-          e.preventDefault();
-          if (!e.repeat) createPage();
-          return;
-        }
-
-        if (key === 'z') {
-          e.preventDefault();
-          undo();
-          return;
-        }
-
-        if (key === 'y') {
-          e.preventDefault();
-          redo();
-          return;
-        }
-      }
-
-      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        navigatePage(-1);
-        return;
-      }
-
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        navigatePage(1);
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [
-    presentationId,
-    presentation,
-    activePageId,
-    setActivePage,
-    redo,
-    undo,
-    addPage,
-    isAddingPage,
-  ]);
+  useShortcut('editor.newPage', createPage, {
+    enabled: () => !!presentationId && !isAddingPage && !atMaxPages,
+  });
+  useShortcut('editor.undo', actions.undo, { enabled: () => canUndo });
+  useShortcut('editor.redo', actions.redo, { enabled: () => canRedo });
+  useShortcut('editor.redoAlt', actions.redo, { enabled: () => canRedo });
+  useShortcut('editor.prevPage', () => navigatePage(-1));
+  useShortcut('editor.nextPage', () => navigatePage(1));
+  useShortcut('editor.deleteSelected', deleteSelected, {
+    enabled: () => !!selectedContentId,
+  });
+  useShortcut('editor.deleteSelectedAlt', deleteSelected, {
+    enabled: () => !!selectedContentId,
+  });
+  useShortcut('editor.deselect', deselect, { enabled: () => !!selectedContentId });
 }

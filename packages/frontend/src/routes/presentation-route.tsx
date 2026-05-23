@@ -10,6 +10,7 @@ import {
 } from '@sts/shared';
 import { useMediaItem } from '../queries/media';
 import { usePresentationDetail } from '../queries/presentations';
+import { useShortcut } from '../shortcuts/use-shortcut';
 import { useEditorStore } from '../stores/editor-store';
 import { useFitScale } from '../features/editor/use-fit-scale';
 import styles from './presentation-route.module.css';
@@ -42,31 +43,10 @@ export function PresentationRoute() {
   const goNext = () => setCurrentIndex((i) => Math.min(pageCount - 1, i + 1));
   const exit = () => navigate(`/presentations/${id}`);
 
-  // Keyboard navigation. Bound globally; safe because this route owns the
-  // viewport in presentation mode (no competing inputs except video controls,
-  // which capture their own key events).
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      // Don't hijack keys while a form control is focused (e.g. the video's
-      // own controls).
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        goPrev();
-      } else if (e.key === 'ArrowRight' || e.key === ' ') {
-        e.preventDefault();
-        goNext();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        exit();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageCount, id]);
+  useShortcut('presentation.prevSlide', goPrev);
+  useShortcut('presentation.nextSlide', goNext);
+  useShortcut('presentation.nextSlideAlt', goNext);
+  useShortcut('presentation.exit', exit);
 
   if (isLoading) {
     return <div className={styles.status}>Loading…</div>;
