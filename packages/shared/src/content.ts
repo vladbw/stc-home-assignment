@@ -12,6 +12,12 @@ export const CoordSchema = z.number().finite();
 export const SizeSchema = z.number().finite().positive();
 
 const BaseContentCreate = z.object({
+  /**
+   * Optional client-supplied ID. Used by undo/redo so a re-created content
+   * item ends up with the same ID it had before, keeping subsequent commands
+   * in the history stack referring to the correct row.
+   */
+  id: z.string().uuid().optional(),
   x: CoordSchema,
   y: CoordSchema,
   width: SizeSchema,

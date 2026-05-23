@@ -7,13 +7,9 @@ import {
   type PageResponse,
   type TextStyle,
 } from '@sts/shared';
-import {
-  useCreateContent,
-  useDeleteContent,
-  useUpdateContent,
-} from '../../queries/content';
-import { useUpdatePage } from '../../queries/pages';
 import { useEditorStore } from '../../stores/editor-store';
+import { useHistoryStore } from '../../stores/history-store';
+import { useEditorActions } from './use-editor-actions';
 import { fitDimensionsToBox } from './media-dimensions';
 import { MediaPicker, type PickedMedia } from './media-picker';
 import styles from './editor.module.css';
@@ -27,10 +23,9 @@ type Props = {
 export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
   const selectContent = useEditorStore((s) => s.selectContent);
 
-  const create = useCreateContent(presentationId);
-  const remove = useDeleteContent(presentationId);
-  const updateContent = useUpdateContent(presentationId);
-  const updatePage = useUpdatePage(presentationId);
+  const actions = useEditorActions(presentationId);
+  const canUndo = useHistoryStore((s) => s.undoStack.length > 0);
+  const canRedo = useHistoryStore((s) => s.redoStack.length > 0);
 
   const [pickerKind, setPickerKind] = useState<'image' | 'video' | null>(null);
 
@@ -42,71 +37,53 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
 
   const handleAddText = () => {
     if (!activePage) return;
-    // width/height are legacy fields for text items — the displayed box
-    // hugs the rendered text, derived from content + fontSize. The values
-    // here are just to satisfy the schema; they're not used for rendering.
-    create.mutate(
-      {
-        pageId: activePage.id,
-        input: {
-          type: 'text',
-          x: 100,
-          y: 100,
-          width: 100,
-          height: 40,
-          text: 'Text',
-          style: DEFAULT_TEXT_STYLE,
-        },
-      },
-      { onSuccess: (newItem) => selectContent(newItem.id) },
-    );
+    const id = actions.addContent(activePage.id, {
+      type: 'text',
+      x: 100,
+      y: 100,
+      width: 100,
+      height: 40,
+      text: 'Text',
+      style: DEFAULT_TEXT_STYLE,
+    });
+    selectContent(id);
   };
 
   const handlePickMedia = (picked: PickedMedia) => {
     if (!activePage || !pickerKind) return;
-    const kind = pickerKind;
-
-    // Use the media's intrinsic dimensions so the content item's box hugs
-    // the actual pixels (no letterboxing). If the natural size is larger
-    // than the canvas, scale it down to fit, preserving aspect ratio.
     const fitted = fitDimensionsToBox(
       { width: picked.naturalWidth, height: picked.naturalHeight },
       CANVAS_WIDTH,
       CANVAS_HEIGHT,
     );
-
-    // Place near the top-left, but clamp so the box stays inside the canvas
-    // even when it's nearly as big as the canvas itself.
     const x = Math.max(0, Math.min(CANVAS_WIDTH - fitted.width, 100));
     const y = Math.max(0, Math.min(CANVAS_HEIGHT - fitted.height, 100));
-
-    create.mutate(
-      {
-        pageId: activePage.id,
-        input: {
-          type: kind,
-          x,
-          y,
-          width: fitted.width,
-          height: fitted.height,
-          mediaId: picked.mediaId,
-        },
-      },
-      { onSuccess: (newItem) => selectContent(newItem.id) },
-    );
+    const baseProps = {
+      x,
+      y,
+      width: fitted.width,
+      height: fitted.height,
+      mediaId: picked.mediaId,
+    };
+    // Branch so `type` narrows to a literal (the discriminated union won't
+    // accept `type: 'image' | 'video'` directly).
+    const id =
+      pickerKind === 'image'
+        ? actions.addContent(activePage.id, { type: 'image', ...baseProps })
+        : actions.addContent(activePage.id, { type: 'video', ...baseProps });
+    selectContent(id);
     setPickerKind(null);
   };
 
   const handleDelete = () => {
     if (!selectedItem) return;
-    remove.mutate(selectedItem.id, {
-      onSuccess: () => selectContent(null),
-    });
+    actions.removeContent(selectedItem);
+    selectContent(null);
   };
 
   const patchStyle = (next: TextStyle) => {
     if (!selectedItem) return;
-    updateContent.mutate({ id: selectedItem.id, input: { style: next } });
+    actions.patchContent(selectedItem, { style: next });
   };
 
   const toggleBold = () => patchStyle({ ...currentStyle, bold: !currentStyle.bold });
@@ -117,10 +94,7 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
 
   const onPageBgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!activePage) return;
-    updatePage.mutate({
-      id: activePage.id,
-      input: { backgroundColor: e.target.value.toUpperCase() },
-    });
+    actions.patchPage(activePage, { backgroundColor: e.target.value.toUpperCase() });
   };
 
   return (
@@ -128,30 +102,42 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
       <div className={styles.toolbar} role="toolbar" aria-label="Editor tools">
         <button
           type="button"
-          onClick={handleAddText}
-          disabled={!activePage || create.isPending}
+          onClick={actions.undo}
+          disabled={!canUndo}
+          title="Undo"
+          aria-label="Undo"
         >
+          ↶
+        </button>
+        <button
+          type="button"
+          onClick={actions.redo}
+          disabled={!canRedo}
+          title="Redo"
+          aria-label="Redo"
+        >
+          ↷
+        </button>
+        <span className={styles.toolbarDivider} aria-hidden />
+
+        <button type="button" onClick={handleAddText} disabled={!activePage}>
           + Text
         </button>
         <button
           type="button"
           onClick={() => setPickerKind('image')}
-          disabled={!activePage || create.isPending}
+          disabled={!activePage}
         >
           + Image
         </button>
         <button
           type="button"
           onClick={() => setPickerKind('video')}
-          disabled={!activePage || create.isPending}
+          disabled={!activePage}
         >
           + Video
         </button>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={!selectedItem || remove.isPending}
-        >
+        <button type="button" onClick={handleDelete} disabled={!selectedItem}>
           Delete
         </button>
 

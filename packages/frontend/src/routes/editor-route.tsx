@@ -5,6 +5,7 @@ import { Canvas } from '../features/editor/canvas';
 import { PageSidebar } from '../features/editor/page-sidebar';
 import { Toolbar } from '../features/editor/toolbar';
 import { useEditorStore } from '../stores/editor-store';
+import { useHistoryStore } from '../stores/history-store';
 import styles from './editor-route.module.css';
 
 export function EditorRoute() {
@@ -15,18 +16,20 @@ export function EditorRoute() {
   const setActivePage = useEditorStore((s) => s.setActivePage);
   const selectedContentId = useEditorStore((s) => s.selectedContentId);
   const reset = useEditorStore((s) => s.reset);
+  const clearHistory = useHistoryStore((s) => s.clear);
 
-  // Reset editor state only when navigating between *different* presentations.
-  // We keep state across editor↔presentation hops so the user returns to the
-  // same slide after a presentation. On initial mount, prevIdRef === id so
-  // no reset fires.
+  // Reset editor + history state only when navigating between *different*
+  // presentations. We keep state across editor↔presentation hops so the user
+  // returns to the same slide after presenting. On initial mount,
+  // prevIdRef === id so nothing fires.
   const prevIdRef = useRef(id);
   useEffect(() => {
     if (prevIdRef.current !== id) {
       reset();
+      clearHistory();
       prevIdRef.current = id;
     }
-  }, [id, reset]);
+  }, [id, reset, clearHistory]);
 
   // Keep the active page id valid against the latest data. If the current
   // active page disappears (e.g. just deleted, or we just navigated to a

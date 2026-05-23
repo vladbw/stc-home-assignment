@@ -36,6 +36,9 @@ export const contentRoutes: FastifyPluginAsync = async (app) => {
 
     const created = await db.contentItem.create({
       data: {
+        // Client may pre-assign an id (used by undo/redo to keep ids stable
+        // across recreate cycles). Otherwise Prisma's @default(uuid()) generates.
+        ...(body.id ? { id: body.id } : {}),
         pageId,
         type: body.type,
         x: body.x,

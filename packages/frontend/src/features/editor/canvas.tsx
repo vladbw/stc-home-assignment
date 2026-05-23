@@ -16,10 +16,10 @@ import {
   type PageResponse,
   type TextStyle,
 } from '@sts/shared';
-import { useUpdateContent } from '../../queries/content';
 import { useMediaItem } from '../../queries/media';
 import { useEditorStore } from '../../stores/editor-store';
 import { useDrag } from './use-drag';
+import { useEditorActions } from './use-editor-actions';
 import { useFitScale } from './use-fit-scale';
 import { useResize, type ResizeCorner } from './use-resize';
 import styles from './editor.module.css';
@@ -109,7 +109,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
   const isEditing = editingId === item.id;
   const isText = item.type === 'text';
 
-  const update = useUpdateContent(presentationId);
+  const actions = useEditorActions(presentationId);
   const currentStyle = resolveStyle(item);
 
   const itemDomRef = useRef<HTMLDivElement>(null);
@@ -152,7 +152,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
       const nextY = Math.max(0, Math.min(CANVAS_HEIGHT - h, item.y + dy));
       if (Math.round(nextX) === Math.round(item.x) && Math.round(nextY) === Math.round(item.y))
         return;
-      update.mutate({ id: item.id, input: { x: nextX, y: nextY } });
+      actions.patchContent(item, { x: nextX, y: nextY });
     },
   });
 
@@ -163,32 +163,31 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
     scale,
     onCommit: ({ x, y, width, height }) => {
       if (isText) {
-        // Scale factor between the new geometric box and the starting one.
-        // Apply it to fontSize. Text + fontSize then determines the *actual*
-        // rendered box; the geometric x / y still anchor the box correctly
-        // because the resize math kept the opposite corner fixed.
         const startW = Math.max(1, renderedSize.w);
         const scaleFactor = width / startW;
         const newFontSize = clampFontSize(currentStyle.fontSize * scaleFactor);
-        if (newFontSize === currentStyle.fontSize && Math.round(x) === Math.round(item.x) && Math.round(y) === Math.round(item.y)) {
+        if (
+          newFontSize === currentStyle.fontSize &&
+          Math.round(x) === Math.round(item.x) &&
+          Math.round(y) === Math.round(item.y)
+        ) {
           return;
         }
-        update.mutate({
-          id: item.id,
-          input: {
-            x: Math.round(x),
-            y: Math.round(y),
-            style: { ...currentStyle, fontSize: newFontSize },
-          },
+        actions.patchContent(item, {
+          x: Math.round(x),
+          y: Math.round(y),
+          style: { ...currentStyle, fontSize: newFontSize },
         });
       } else {
         const clampedW = Math.min(width, CANVAS_WIDTH);
         const clampedH = Math.min(height, CANVAS_HEIGHT);
         const clampedX = Math.max(0, Math.min(CANVAS_WIDTH - clampedW, x));
         const clampedY = Math.max(0, Math.min(CANVAS_HEIGHT - clampedH, y));
-        update.mutate({
-          id: item.id,
-          input: { x: clampedX, y: clampedY, width: clampedW, height: clampedH },
+        actions.patchContent(item, {
+          x: clampedX,
+          y: clampedY,
+          width: clampedW,
+          height: clampedH,
         });
       }
     },
@@ -382,23 +381,22 @@ function TextEditView({
   style: TextStyle;
 }) {
   const endEdit = useEditorStore((s) => s.endEdit);
-  const update = useUpdateContent(presentationId);
+  const actions = useEditorActions(presentationId);
 
   const draftRef = useRef(item.text ?? '');
   const cancelledRef = useRef(false);
   const itemRef = useRef(item);
   itemRef.current = item;
-  const updateRef = useRef(update);
-  updateRef.current = update;
+  // Capture `actions` in a ref so the unmount cleanup can call the latest
+  // version (actions is recreated on each render).
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
 
   useEffect(() => {
     return () => {
       const value = draftRef.current;
       if (!cancelledRef.current && value !== (itemRef.current.text ?? '')) {
-        updateRef.current.mutate({
-          id: itemRef.current.id,
-          input: { text: value },
-        });
+        actionsRef.current.patchContent(itemRef.current, { text: value });
       }
     };
   }, []);
