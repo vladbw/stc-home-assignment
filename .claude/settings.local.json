@@ -4,7 +4,20 @@
       "Bash(npm install *)",
       "Bash(docker info *)",
       "Bash(npm run *)",
-      "Bash(npx dotenv -e ../../.env -- node --input-type=module -e ' *)"
+      "Bash(npx dotenv -e ../../.env -- node --input-type=module -e ' *)",
+      "Bash(set -e)",
+      "Bash(curl -sS http://localhost:3000/api/health)",
+      "Bash(curl -sS http://localhost:3000/api/presentations)",
+      "Bash(curl -sS -X POST http://localhost:3000/api/presentations -H \"Content-Type: application/json\" -d '{\"title\":\"  My deck  \"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS -X POST http://localhost:3000/api/presentations -H \"Content-Type: application/json\" -d '{\"title\":\"Welcome\"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS -X POST http://localhost:3000/api/presentations -H \"Content-Type: application/json\" -d '{\"title\":\"\"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS http://localhost:3000/api/presentations/not-a-uuid -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS http://localhost:3000/api/presentations/00000000-0000-4000-8000-000000000000 -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS -X PATCH \"http://localhost:3000/api/presentations/8dff0e30-9c5e-45fe-aa41-eb5806c0ce31\" -H \"Content-Type: application/json\" -d '{\"title\":\"My deck renamed\"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS -X PATCH \"http://localhost:3000/api/presentations/8dff0e30-9c5e-45fe-aa41-eb5806c0ce31\" -H \"Content-Type: application/json\" -d '{\"title\":\"Welcome\"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -sS http://localhost:3000/api/presentations/122e301c-a421-4de9-a2cb-db2cc6d7a6a6)",
+      "Bash(curl -sS -X DELETE \"http://localhost:3000/api/presentations/8dff0e30-9c5e-45fe-aa41-eb5806c0ce31\" -o /dev/null -w \"status=%{http_code}\\\\n\")",
+      "Bash(curl -sS -X DELETE \"http://localhost:3000/api/presentations/00000000-0000-4000-8000-000000000000\" -w \"\\\\nstatus=%{http_code}\\\\n\")"
     ]
   }
 }

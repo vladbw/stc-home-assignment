@@ -1,14 +1,6 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
+import { buildApp } from './app';
 
-const app = Fastify({ logger: true });
-
-await app.register(cors, {
-  origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173',
-});
-
-app.get('/api/health', async () => ({ status: 'running' }));
-
+const app = await buildApp();
 const port = Number(process.env.PORT ?? 3000);
 
 try {
