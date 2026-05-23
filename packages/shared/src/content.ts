@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TextStyleSchema } from './style';
+import { TextStyleSchema, type TextStyle } from './style';
 
 export const ContentTypeSchema = z.enum(['text', 'image', 'video']);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
@@ -64,3 +64,20 @@ export const UpdateContentSchema = z.object({
   style: TextStyleSchema.optional(),
 });
 export type UpdateContentInput = z.infer<typeof UpdateContentSchema>;
+
+/** Shape returned by the API for a content item. */
+export type ContentResponse = {
+  id: string;
+  pageId: string;
+  type: ContentType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  text: string | null;
+  style: TextStyle | null;
+  mediaId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

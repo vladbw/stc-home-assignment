@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { PageResponse } from './page';
 
 /** Title used for a Presentation. Trimmed, 1-200 chars. */
 export const TitleSchema = z.string().trim().min(1).max(200);
@@ -22,3 +23,12 @@ export const PresentationListItemSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 export type PresentationListItem = z.infer<typeof PresentationListItemSchema>;
+
+/** Shape returned by GET /api/presentations/:id (full tree). */
+export type PresentationDetail = {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  pages: PageResponse[];
+};
