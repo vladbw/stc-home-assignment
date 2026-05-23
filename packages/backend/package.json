@@ -14,7 +14,9 @@
     "db:generate": "prisma generate",
     "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
     "db:studio": "dotenv -e ../../.env -- prisma studio",
-    "check:s3": "dotenv -e ../../.env -- tsx scripts/check-s3.ts"
+    "check:s3": "dotenv -e ../../.env -- tsx scripts/check-s3.ts",
+    "prod:migrate": "prisma migrate deploy",
+    "prod:start": "tsx src/index.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.700.0",
