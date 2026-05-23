@@ -102,11 +102,98 @@
 
 .contentItem {
   position: absolute;
+  cursor: grab;
+  touch-action: none; /* let Pointer Events drive the drag, not browser pan/zoom */
   /* width/height/x/y set inline based on data */
+}
+
+.contentItemSelected {
+  outline: 2px solid #007aff;
+  outline-offset: 2px;
 }
 
 .contentText {
   white-space: pre-wrap;
   overflow: hidden;
   user-select: none;
+}
+
+/* Toolbar -------------------------------------------------------------- */
+
+.toolbar {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid currentColor;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.toolbarDivider {
+  display: inline-block;
+  width: 1px;
+  height: 1.5rem;
+  background: currentColor;
+  opacity: 0.3;
+  margin: 0 0.25rem;
+}
+
+.toolbarToggleActive {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.colorPicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.colorPicker input[type='color'] {
+  inline-size: 2rem;
+  block-size: 1.6rem;
+  padding: 0;
+  border: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Inline-edit textarea overlay ----------------------------------------- */
+
+.contentTextEditing {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px dashed #007aff;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  font: inherit;
+  outline: none;
+  box-sizing: border-box;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+/* Resize handles ------------------------------------------------------- */
+
+.resizeHandle {
+  position: absolute;
+  background: #007aff;
+  border: 1px solid #ffffff;
+  box-sizing: border-box;
+  z-index: 10000;
+  touch-action: none;
 }

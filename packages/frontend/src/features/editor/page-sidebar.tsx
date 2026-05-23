@@ -1,14 +1,16 @@
 import { MAX_PAGES_PER_PRESENTATION, type PresentationDetail } from '@sts/shared';
 import { useAddPage, useDeletePage } from '../../queries/pages';
+import { useEditorStore } from '../../stores/editor-store';
 import styles from './editor.module.css';
 
 type Props = {
   presentation: PresentationDetail;
-  activePageId: string | null;
-  onSelectPage: (id: string) => void;
 };
 
-export function PageSidebar({ presentation, activePageId, onSelectPage }: Props) {
+export function PageSidebar({ presentation }: Props) {
+  const activePageId = useEditorStore((s) => s.activePageId);
+  const setActivePage = useEditorStore((s) => s.setActivePage);
+
   const add = useAddPage(presentation.id);
   const remove = useDeletePage(presentation.id);
 
@@ -17,7 +19,7 @@ export function PageSidebar({ presentation, activePageId, onSelectPage }: Props)
 
   const handleAdd = () => {
     add.mutate(undefined, {
-      onSuccess: (newPage) => onSelectPage(newPage.id),
+      onSuccess: (newPage) => setActivePage(newPage.id),
     });
   };
 
@@ -25,13 +27,11 @@ export function PageSidebar({ presentation, activePageId, onSelectPage }: Props)
     if (!confirm('Delete this page?')) return;
     remove.mutate(pageId, {
       onSuccess: () => {
-        // If we just deleted the active page, jump to a neighbor.
         if (pageId === activePageId) {
           const idx = presentation.pages.findIndex((p) => p.id === pageId);
           const remaining = presentation.pages.filter((p) => p.id !== pageId);
-          // Prefer the next page, fall back to the previous, then null.
           const next = remaining[idx] ?? remaining[idx - 1] ?? null;
-          if (next) onSelectPage(next.id);
+          setActivePage(next?.id ?? null);
         }
       },
     });
@@ -47,7 +47,7 @@ export function PageSidebar({ presentation, activePageId, onSelectPage }: Props)
               <button
                 type="button"
                 className={`${styles.sidebarSelect} ${isActive ? styles.sidebarSelectActive : ''}`}
-                onClick={() => onSelectPage(page.id)}
+                onClick={() => setActivePage(page.id)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 Page {index + 1}

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import type { UpdatePageInput } from '@sts/shared';
+import type { PresentationDetail, UpdatePageInput } from '@sts/shared';
 import { pageService } from '../services/pages';
 import { presentationKeys } from './presentations';
 
@@ -40,16 +40,44 @@ export function useDeletePage(presentationId: string) {
   });
 }
 
+/**
+ * Optimistic update for page-level fields (currently backgroundColor).
+ * Mirrors the pattern in useUpdateContent: patch cache → roll back on error
+ * → invalidate on settle.
+ */
 export function useUpdatePage(presentationId: string) {
   const qc = useQueryClient();
+  const detailKey = presentationKeys.detail(presentationId);
+
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdatePageInput }) =>
       pageService.update(id, input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: presentationKeys.detail(presentationId) });
+
+    onMutate: async ({ id, input }) => {
+      await qc.cancelQueries({ queryKey: detailKey });
+      const previous = qc.getQueryData<PresentationDetail>(detailKey);
+
+      if (previous) {
+        qc.setQueryData<PresentationDetail>(detailKey, {
+          ...previous,
+          pages: previous.pages.map((page) =>
+            page.id === id ? { ...page, ...input } : page,
+          ),
+        });
+      }
+
+      return { previous };
     },
-    onError: (err: Error) => {
+
+    onError: (err: Error, _vars, context) => {
+      if (context?.previous) {
+        qc.setQueryData(detailKey, context.previous);
+      }
       toast.error(err.message);
+    },
+
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: detailKey });
     },
   });
 }
