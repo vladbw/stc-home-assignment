@@ -205,3 +205,49 @@
   z-index: 10000;
   touch-action: none;
 }
+
+/* Media content -------------------------------------------------------- */
+
+.mediaContent {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  display: block;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/*
+ * Images: pointer-events disabled so a click never lands on the <img>;
+ * the outer .contentItem is always the pointerdown target → its drag
+ * handler runs cleanly.
+ */
+.mediaContentImage {
+  pointer-events: none;
+}
+
+/*
+ * Videos: pointer-events enabled so the native controls (play, mute,
+ * fullscreen) work. Drag still works because pointerdown bubbles to the
+ * outer .contentItem, which captures the pointer for the gesture.
+ *
+ * Known limitation: scrubbing the timeline conflicts with item-drag —
+ * once the outer div captures the pointer, the scrubber stops receiving
+ * pointermove events.
+ */
+.mediaContentVideo {
+  pointer-events: auto;
+}
+
+.mediaLoading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.04);
+  pointer-events: none;
+  font-size: 0.8rem;
+  color: #666;
+  user-select: none;
+}

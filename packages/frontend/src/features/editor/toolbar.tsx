@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
   DEFAULT_TEXT_STYLE,
   type ContentResponse,
   type PageResponse,
@@ -11,6 +14,8 @@ import {
 } from '../../queries/content';
 import { useUpdatePage } from '../../queries/pages';
 import { useEditorStore } from '../../stores/editor-store';
+import { fitDimensionsToBox } from './media-dimensions';
+import { MediaPicker, type PickedMedia } from './media-picker';
 import styles from './editor.module.css';
 
 type Props = {
@@ -27,8 +32,12 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
   const updateContent = useUpdateContent(presentationId);
   const updatePage = useUpdatePage(presentationId);
 
+  const [pickerKind, setPickerKind] = useState<'image' | 'video' | null>(null);
+
   const isTextSelected = selectedItem?.type === 'text';
-  const currentStyle: TextStyle = selectedItem?.style ?? DEFAULT_TEXT_STYLE;
+  const currentStyle: TextStyle = selectedItem?.style
+    ? { ...DEFAULT_TEXT_STYLE, ...selectedItem.style }
+    : DEFAULT_TEXT_STYLE;
   const showPageControls = !selectedItem && !!activePage;
 
   const handleAddText = () => {
@@ -49,10 +58,43 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
           style: DEFAULT_TEXT_STYLE,
         },
       },
-      {
-        onSuccess: (newItem) => selectContent(newItem.id),
-      },
+      { onSuccess: (newItem) => selectContent(newItem.id) },
     );
+  };
+
+  const handlePickMedia = (picked: PickedMedia) => {
+    if (!activePage || !pickerKind) return;
+    const kind = pickerKind;
+
+    // Use the media's intrinsic dimensions so the content item's box hugs
+    // the actual pixels (no letterboxing). If the natural size is larger
+    // than the canvas, scale it down to fit, preserving aspect ratio.
+    const fitted = fitDimensionsToBox(
+      { width: picked.naturalWidth, height: picked.naturalHeight },
+      CANVAS_WIDTH,
+      CANVAS_HEIGHT,
+    );
+
+    // Place near the top-left, but clamp so the box stays inside the canvas
+    // even when it's nearly as big as the canvas itself.
+    const x = Math.max(0, Math.min(CANVAS_WIDTH - fitted.width, 100));
+    const y = Math.max(0, Math.min(CANVAS_HEIGHT - fitted.height, 100));
+
+    create.mutate(
+      {
+        pageId: activePage.id,
+        input: {
+          type: kind,
+          x,
+          y,
+          width: fitted.width,
+          height: fitted.height,
+          mediaId: picked.mediaId,
+        },
+      },
+      { onSuccess: (newItem) => selectContent(newItem.id) },
+    );
+    setPickerKind(null);
   };
 
   const handleDelete = () => {
@@ -82,69 +124,93 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
   };
 
   return (
-    <div className={styles.toolbar} role="toolbar" aria-label="Editor tools">
-      <button
-        type="button"
-        onClick={handleAddText}
-        disabled={!activePage || create.isPending}
-      >
-        + Text
-      </button>
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={!selectedItem || remove.isPending}
-      >
-        Delete
-      </button>
+    <>
+      <div className={styles.toolbar} role="toolbar" aria-label="Editor tools">
+        <button
+          type="button"
+          onClick={handleAddText}
+          disabled={!activePage || create.isPending}
+        >
+          + Text
+        </button>
+        <button
+          type="button"
+          onClick={() => setPickerKind('image')}
+          disabled={!activePage || create.isPending}
+        >
+          + Image
+        </button>
+        <button
+          type="button"
+          onClick={() => setPickerKind('video')}
+          disabled={!activePage || create.isPending}
+        >
+          + Video
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={!selectedItem || remove.isPending}
+        >
+          Delete
+        </button>
 
-      {isTextSelected && (
-        <>
-          <span className={styles.toolbarDivider} aria-hidden />
-          <button
-            type="button"
-            onClick={toggleBold}
-            aria-pressed={currentStyle.bold}
-            className={currentStyle.bold ? styles.toolbarToggleActive : ''}
-            title="Bold"
-            style={{ fontWeight: 700, minWidth: '2rem' }}
-          >
-            B
-          </button>
-          <button
-            type="button"
-            onClick={toggleItalic}
-            aria-pressed={currentStyle.italic}
-            className={currentStyle.italic ? styles.toolbarToggleActive : ''}
-            title="Italic"
-            style={{ fontStyle: 'italic', minWidth: '2rem' }}
-          >
-            I
-          </button>
-          <label className={styles.colorPicker} title="Text color">
-            <span>Color</span>
-            <input
-              type="color"
-              value={currentStyle.color.toLowerCase()}
-              onChange={onTextColorChange}
-            />
-          </label>
-        </>
-      )}
+        {isTextSelected && (
+          <>
+            <span className={styles.toolbarDivider} aria-hidden />
+            <button
+              type="button"
+              onClick={toggleBold}
+              aria-pressed={currentStyle.bold}
+              className={currentStyle.bold ? styles.toolbarToggleActive : ''}
+              title="Bold"
+              style={{ fontWeight: 700, minWidth: '2rem' }}
+            >
+              B
+            </button>
+            <button
+              type="button"
+              onClick={toggleItalic}
+              aria-pressed={currentStyle.italic}
+              className={currentStyle.italic ? styles.toolbarToggleActive : ''}
+              title="Italic"
+              style={{ fontStyle: 'italic', minWidth: '2rem' }}
+            >
+              I
+            </button>
+            <label className={styles.colorPicker} title="Text color">
+              <span>Color</span>
+              <input
+                type="color"
+                value={currentStyle.color.toLowerCase()}
+                onChange={onTextColorChange}
+              />
+            </label>
+          </>
+        )}
 
-      {showPageControls && (
-        <>
-          <span className={styles.toolbarDivider} aria-hidden />
-          <label className={styles.colorPicker} title="Page background color">
-            <span>Page background</span>
-            <input
-              type="color"
-              value={activePage.backgroundColor.toLowerCase()}
-              onChange={onPageBgChange}
-            />
-          </label>
-        </>
+        {showPageControls && (
+          <>
+            <span className={styles.toolbarDivider} aria-hidden />
+            <label className={styles.colorPicker} title="Page background color">
+              <span>Page background</span>
+              <input
+                type="color"
+                value={activePage.backgroundColor.toLowerCase()}
+                onChange={onPageBgChange}
+              />
+            </label>
+          </>
+        )}
+      </div>
+
+      {pickerKind && (
+        <MediaPicker
+          kind={pickerKind}
+          onClose={() => setPickerKind(null)}
+          onPick={handlePickMedia}
+        />
       )}
-    </div>
+    </>
   );
 }

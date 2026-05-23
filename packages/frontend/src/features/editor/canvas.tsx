@@ -17,6 +17,7 @@ import {
   type TextStyle,
 } from '@sts/shared';
 import { useUpdateContent } from '../../queries/content';
+import { useMediaItem } from '../../queries/media';
 import { useEditorStore } from '../../stores/editor-store';
 import { useDrag } from './use-drag';
 import { useFitScale } from './use-fit-scale';
@@ -259,7 +260,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
       {item.text || ' '}
     </div>
   ) : (
-    <span style={{ pointerEvents: 'none' }}>[{item.type}]</span>
+    <MediaContent item={item} />
   );
 
   return (
@@ -284,6 +285,55 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * Renders an image or video content item by fetching its Media record
+ * (and presigned GET URL) through useMediaItem. Pointer events are disabled
+ * on the inner img/video so the parent's drag/resize handlers receive them
+ * cleanly.
+ */
+function MediaContent({ item }: { item: ContentResponse }) {
+  const { data: media } = useMediaItem(item.mediaId);
+
+  if (!media || !media.url) {
+    return <div className={styles.mediaLoading}>Loading…</div>;
+  }
+
+  if (item.type === 'image') {
+    return (
+      <img
+        src={media.url}
+        alt={media.originalFilename}
+        draggable={false}
+        className={`${styles.mediaContent} ${styles.mediaContentImage}`}
+      />
+    );
+  }
+
+  // Video:
+  //  - `controls` so the user has a visible play button (and so they can
+  //    tell at a glance that this is a video, not a black box).
+  //  - `preload="auto"` so the browser actually loads enough data to paint
+  //    the first frame. With `preload="metadata"` the element shows nothing
+  //    until playback starts, which looks like a broken element.
+  //  - On `loadedmetadata`, nudge `currentTime` past 0. Some browsers won't
+  //    composite a frame until time has advanced; this guarantees a visible
+  //    poster-like first frame even when paused.
+  return (
+    <video
+      src={media.url}
+      controls
+      muted
+      preload="auto"
+      playsInline
+      className={`${styles.mediaContent} ${styles.mediaContentVideo}`}
+      onLoadedMetadata={(e) => {
+        const v = e.currentTarget;
+        if (v.currentTime === 0) v.currentTime = 0.001;
+      }}
+    />
   );
 }
 
