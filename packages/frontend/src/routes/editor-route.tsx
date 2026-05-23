@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePresentationDetail } from '../queries/presentations';
 import { Canvas } from '../features/editor/canvas';
@@ -19,17 +19,16 @@ export function EditorRoute() {
   const reset = useEditorStore((s) => s.reset);
   const clearHistory = useHistoryStore((s) => s.clear);
 
-  // Reset editor + history state only when navigating between *different*
-  // presentations. We keep state across editor↔presentation hops so the user
-  // returns to the same slide after presenting. On initial mount,
-  // prevIdRef === id so nothing fires.
-  const prevIdRef = useRef(id);
+  // Start every editor visit from clean local state, and clear again when
+  // leaving so undo/redo history never leaks into the next editor session.
   useEffect(() => {
-    if (prevIdRef.current !== id) {
+    reset();
+    clearHistory();
+
+    return () => {
       reset();
       clearHistory();
-      prevIdRef.current = id;
-    }
+    };
   }, [id, reset, clearHistory]);
 
   // Keep the active page id valid against the latest data. If the current
