@@ -91,10 +91,10 @@ export function PresentationCard({ presentation }: Props) {
           {presentation.title}
         </Link>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-          <span>
+          <p className='text-foreground'>
             {presentation.pageCount} {presentation.pageCount === 1 ? 'page' : 'pages'}
-          </span>
-          <span>{new Date(presentation.updatedAt).toLocaleString()}</span>
+          </p>
+          <p>Created at {new Date(presentation.createdAt).toLocaleString()}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">

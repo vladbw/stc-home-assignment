@@ -43,7 +43,7 @@ export function CreatePresentationForm() {
     >
       <Input
         type="text"
-        placeholder="New presentation title"
+        placeholder="Think of a title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         maxLength={200}
