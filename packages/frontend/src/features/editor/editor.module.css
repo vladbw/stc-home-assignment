@@ -1,74 +1,3 @@
-/* Sidebar ---------------------------------------------------------------- */
-
-.sidebar {
-  border-right: 1px solid currentColor;
-  padding: 0.75rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.sidebarList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 0.25rem;
-}
-
-.sidebarItem {
-  display: flex;
-  gap: 0.25rem;
-  align-items: stretch;
-}
-
-.sidebarSelect {
-  flex: 1;
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid currentColor;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.sidebarSelectActive {
-  background: rgba(0, 0, 0, 0.08);
-  font-weight: 600;
-}
-
-.sidebarRemove {
-  padding: 0 0.5rem;
-  border: 1px solid currentColor;
-  background: transparent;
-  cursor: pointer;
-}
-
-.sidebarRemove:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.addPageButton {
-  padding: 0.5rem;
-  border: 1px dashed currentColor;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.addPageButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.pageCount {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  text-align: center;
-}
-
 /* Canvas ----------------------------------------------------------------- */
 
 .canvasArea {
@@ -76,7 +5,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #f4f4f4;
+  background: var(--color-control);
 }
 
 .canvasStage {
@@ -88,7 +17,9 @@
   top: 0;
   left: 0;
   transform-origin: top left;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 24px 55px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(242, 240, 234, 0.14);
   overflow: hidden;
 }
 
@@ -111,7 +42,7 @@
 }
 
 .contentItemSelected {
-  outline: 2px solid #007aff;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -122,65 +53,12 @@
   /* font-size / weight / style / color come from the item's TextStyle. */
 }
 
-/* Toolbar -------------------------------------------------------------- */
-
-.toolbar {
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid currentColor;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.toolbar button {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid currentColor;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.toolbar button:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.toolbarDivider {
-  display: inline-block;
-  width: 1px;
-  height: 1.5rem;
-  background: currentColor;
-  opacity: 0.3;
-  margin: 0 0.25rem;
-}
-
-.toolbarToggleActive {
-  background: rgba(0, 0, 0, 0.15);
-}
-
-.colorPicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-
-.colorPicker input[type='color'] {
-  inline-size: 2rem;
-  block-size: 1.6rem;
-  padding: 0;
-  border: 1px solid currentColor;
-  background: transparent;
-  cursor: pointer;
-}
-
 /* Inline-edit textarea overlay ----------------------------------------- */
 
 .contentTextEditing {
   position: absolute;
   background: transparent;
-  border: 2px dashed #007aff;
+  border: 2px dashed var(--color-accent);
   padding: 0;
   margin: 0;
   resize: none;
@@ -199,8 +77,8 @@
 
 .resizeHandle {
   position: absolute;
-  background: #007aff;
-  border: 1px solid #ffffff;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent-foreground);
   box-sizing: border-box;
   z-index: 10000;
   touch-action: none;
@@ -223,7 +101,7 @@
   pointer-events: none;
   user-select: none;
   display: block;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(23, 32, 30, 0.08);
 }
 
 .mediaLoading {
@@ -232,9 +110,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(23, 32, 30, 0.08);
   pointer-events: none;
   font-size: 0.8rem;
-  color: #666;
+  color: #4c5550;
   user-select: none;
 }

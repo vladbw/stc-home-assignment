@@ -8,38 +8,39 @@ import {
   usePresentations,
   useRenamePresentation,
 } from '../queries/presentations';
+import { Button } from '../components/ui/button';
+import { Card, cardVariants } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { PageContent, PageShell } from '../components/ui/page-shell';
+import { cn } from '../lib/cn';
 import { usePresentationsListKeybindings } from './use-presentations-list-keybindings';
 
-const cardClass =
-  'grid gap-4 rounded-lg border border-stone-100/12 bg-[#1b2321] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.24)] transition-colors hover:border-lime-200/35 sm:grid-cols-[1fr_auto] sm:items-center';
-const buttonClass =
-  'rounded-lg border border-stone-100/14 bg-[#151b1a] px-3 py-2 text-sm font-medium text-stone-100 transition hover:border-lime-200/45 hover:bg-[#202a27] disabled:cursor-not-allowed disabled:opacity-45';
-const primaryButtonClass =
-  'rounded-lg bg-lime-200 px-4 py-2 text-sm font-semibold text-[#17201e] transition hover:bg-lime-100 disabled:cursor-not-allowed disabled:opacity-60';
-const inputClass =
-  'min-w-0 rounded-lg border border-stone-100/14 bg-[#151b1a] px-4 py-3 text-stone-100 outline-none transition placeholder:text-stone-100/40 focus:border-lime-200/60 focus:ring-4 focus:ring-lime-200/10';
+const presentationCardClass = cn(
+  cardVariants({ variant: 'interactive', padding: 'md' }),
+  'grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center',
+);
 
 export function PresentationsListRoute() {
   return (
-    <main className="min-h-screen bg-[#18201e] bg-[linear-gradient(rgba(242,240,234,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(242,240,234,0.045)_1px,transparent_1px)] bg-[size:34px_34px] px-5 py-10 text-stone-100 sm:px-8">
-      <div className="mx-auto max-w-4xl">
-        <header className="mb-8 flex flex-col gap-3 border-b border-stone-100/12 pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <PageShell>
+      <PageContent>
+        <header className="mb-8 flex flex-col gap-3 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-lime-200/80">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent/80">
               Workspace
             </p>
-            <h1 className="text-4xl font-semibold tracking-normal text-stone-100">
+            <h1 className="text-4xl font-semibold tracking-normal text-foreground">
               Presentations
             </h1>
           </div>
-          <p className="max-w-sm text-sm leading-6 text-stone-300">
+          <p className="max-w-sm text-sm leading-6 text-muted">
             Create and manage decks before opening the editor workbench.
           </p>
         </header>
         <CreateForm />
         <ListView />
-      </div>
-    </main>
+      </PageContent>
+    </PageShell>
   );
 }
 
@@ -72,19 +73,21 @@ function CreateForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="mb-7 grid gap-3 rounded-lg border border-stone-100/12 bg-[#222b28] p-3 shadow-[0_28px_70px_rgba(0,0,0,0.28)] sm:grid-cols-[1fr_auto]"
+      className={cn(
+        cardVariants({ padding: 'sm' }),
+        'mb-7 grid gap-3 bg-panel-raised shadow-panel-raised sm:grid-cols-[1fr_auto]',
+      )}
     >
-      <input
+      <Input
         type="text"
         placeholder="New presentation title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         maxLength={200}
-        className={inputClass}
       />
-      <button type="submit" disabled={isPending} className={primaryButtonClass}>
+      <Button type="submit" disabled={isPending} variant="primary">
         {isPending ? 'Creating…' : 'Create'}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -92,18 +95,18 @@ function CreateForm() {
 function ListView() {
   const { data, isLoading, error } = usePresentations();
 
-  if (isLoading) return <p className="text-stone-300">Loading…</p>;
+  if (isLoading) return <p className="text-muted">Loading…</p>;
   if (error) return <p className="text-red-300">{error.message}</p>;
   if (!data || data.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-stone-100/16 bg-[#1b2321] p-5 text-sm text-stone-300">
+      <Card variant="dashed" padding="lg" className="text-sm text-muted">
         No presentations yet.
-      </p>
+      </Card>
     );
   }
 
   return (
-    <ul className="grid list-none gap-3 p-0">
+    <ul className="m-0 grid list-none gap-3 p-0">
       {data.map((p) => (
         <li key={p.id}>
           <PresentationCard presentation={p} />
@@ -158,36 +161,35 @@ function PresentationCard({ presentation }: { presentation: PresentationListItem
 
   if (renaming) {
     return (
-      <form ref={cardRef} onSubmit={onRenameSubmit} className={cardClass}>
-        <input
+      <form ref={cardRef} onSubmit={onRenameSubmit} className={presentationCardClass}>
+        <Input
           autoFocus
           value={draftTitle}
           onChange={(e) => setDraftTitle(e.target.value)}
           maxLength={200}
-          className={inputClass}
         />
         <div className="flex flex-wrap gap-2">
-          <button type="submit" disabled={rename.isPending} className={primaryButtonClass}>
+          <Button type="submit" disabled={rename.isPending} variant="primary">
             Save
-          </button>
-          <button type="button" onClick={cancelRename} className={buttonClass}>
+          </Button>
+          <Button type="button" onClick={cancelRename}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     );
   }
 
   return (
-    <article className={cardClass}>
+    <article className={presentationCardClass}>
       <div className="grid gap-2">
         <Link
           to={`/presentations/${presentation.id}`}
-          className="text-lg font-semibold text-stone-100 no-underline transition hover:text-lime-200"
+          className="text-lg font-semibold text-foreground no-underline transition hover:text-accent"
         >
           {presentation.title}
         </Link>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-400">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
           <span>
             {presentation.pageCount} {presentation.pageCount === 1 ? 'page' : 'pages'}
           </span>
@@ -195,17 +197,17 @@ function PresentationCard({ presentation }: { presentation: PresentationListItem
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => setRenaming(true)} className={buttonClass}>
+        <Button type="button" onClick={() => setRenaming(true)}>
           Rename
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onDelete}
           disabled={remove.isPending}
-          className={buttonClass}
+          variant="destructive"
         >
           Delete
-        </button>
+        </Button>
       </div>
     </article>
   );

@@ -7,12 +7,12 @@ import {
   type PageResponse,
   type TextStyle,
 } from '@sts/shared';
+import { Button } from '../../components/ui/button';
 import { useEditorStore } from '../../stores/editor-store';
 import { useHistoryStore } from '../../stores/history-store';
 import { useEditorActions } from './use-editor-actions';
 import { fitDimensionsToBox } from './media-dimensions';
 import { MediaPicker, type PickedMedia } from './media-picker';
-import styles from './editor.module.css';
 
 type Props = {
   presentationId: string;
@@ -99,77 +99,77 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
 
   return (
     <>
-      <div className={styles.toolbar} role="toolbar" aria-label="Editor tools">
-        <button
-          type="button"
+      <div
+        className="flex flex-wrap items-center gap-2 border-b border-border bg-panel-raised px-4 py-3"
+        role="toolbar"
+        aria-label="Editor tools"
+      >
+        <Button
           onClick={actions.undo}
           disabled={!canUndo}
           title="Undo"
           aria-label="Undo"
+          size="icon"
         >
           ↶
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={actions.redo}
           disabled={!canRedo}
           title="Redo"
           aria-label="Redo"
+          size="icon"
         >
           ↷
-        </button>
-        <span className={styles.toolbarDivider} aria-hidden />
+        </Button>
+        <span className="mx-1 h-6 w-px bg-border" aria-hidden />
 
-        <button type="button" onClick={handleAddText} disabled={!activePage}>
+        <Button onClick={handleAddText} disabled={!activePage}>
           + Text
-        </button>
-        <button
-          type="button"
-          onClick={() => setPickerKind('image')}
-          disabled={!activePage}
-        >
+        </Button>
+        <Button onClick={() => setPickerKind('image')} disabled={!activePage}>
           + Image
-        </button>
-        <button
-          type="button"
-          onClick={() => setPickerKind('video')}
-          disabled={!activePage}
-        >
+        </Button>
+        <Button onClick={() => setPickerKind('video')} disabled={!activePage}>
           + Video
-        </button>
-        <button type="button" onClick={handleDelete} disabled={!selectedItem}>
+        </Button>
+        <Button onClick={handleDelete} disabled={!selectedItem} variant="destructive">
           Delete
-        </button>
+        </Button>
 
         {isTextSelected && (
           <>
-            <span className={styles.toolbarDivider} aria-hidden />
-            <button
-              type="button"
+            <span className="mx-1 h-6 w-px bg-border" aria-hidden />
+            <Button
               onClick={toggleBold}
               aria-pressed={currentStyle.bold}
-              className={currentStyle.bold ? styles.toolbarToggleActive : ''}
+              active={currentStyle.bold}
               title="Bold"
-              style={{ fontWeight: 700, minWidth: '2rem' }}
+              size="icon"
+              className="font-bold"
             >
               B
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={toggleItalic}
               aria-pressed={currentStyle.italic}
-              className={currentStyle.italic ? styles.toolbarToggleActive : ''}
+              active={currentStyle.italic}
               title="Italic"
-              style={{ fontStyle: 'italic', minWidth: '2rem' }}
+              size="icon"
+              className="italic"
             >
               I
-            </button>
-            <label className={styles.colorPicker} title="Text color">
+            </Button>
+            <label
+              className="inline-flex cursor-pointer items-center gap-2 text-sm text-muted"
+              title="Text color"
+            >
               <span>Color</span>
               <input
                 type="color"
                 value={currentStyle.color.toLowerCase()}
                 onChange={onTextColorChange}
+                className="h-8 w-10 cursor-pointer border border-border bg-transparent p-0"
               />
             </label>
           </>
@@ -177,13 +177,17 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
 
         {showPageControls && (
           <>
-            <span className={styles.toolbarDivider} aria-hidden />
-            <label className={styles.colorPicker} title="Page background color">
+            <span className="mx-1 h-6 w-px bg-border" aria-hidden />
+            <label
+              className="inline-flex cursor-pointer items-center gap-2 text-sm text-muted"
+              title="Page background color"
+            >
               <span>Page background</span>
               <input
                 type="color"
                 value={activePage.backgroundColor.toLowerCase()}
                 onChange={onPageBgChange}
+                className="h-8 w-10 cursor-pointer border border-border bg-transparent p-0"
               />
             </label>
           </>

@@ -1,7 +1,8 @@
 import { MAX_PAGES_PER_PRESENTATION, type PresentationDetail } from '@sts/shared';
 import { useAddPage, useDeletePage } from '../../queries/pages';
+import { Button } from '../../components/ui/button';
+import { cn } from '../../lib/cn';
 import { useEditorStore } from '../../stores/editor-store';
-import styles from './editor.module.css';
 
 type Props = {
   presentation: PresentationDetail;
@@ -38,45 +39,52 @@ export function PageSidebar({ presentation }: Props) {
   };
 
   return (
-    <aside className={styles.sidebar} aria-label="Pages">
-      <ol className={styles.sidebarList}>
+    <aside
+      className="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border bg-panel px-3 py-4"
+      aria-label="Pages"
+    >
+      <ol className="grid list-none gap-2 p-0 m-0">
         {presentation.pages.map((page, index) => {
           const isActive = page.id === activePageId;
           return (
-            <li key={page.id} className={styles.sidebarItem}>
+            <li key={page.id} className="flex items-stretch gap-2">
               <button
                 type="button"
-                className={`${styles.sidebarSelect} ${isActive ? styles.sidebarSelectActive : ''}`}
+                className={cn(
+                  'min-h-10 flex-1 rounded-control border border-border bg-control px-3 py-2 text-left text-sm text-foreground transition hover:border-accent/45 hover:bg-control-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/15',
+                  isActive && 'border-accent/55 bg-control-hover font-semibold text-accent',
+                )}
                 onClick={() => setActivePage(page.id)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 Page {index + 1}
               </button>
-              <button
-                type="button"
-                className={styles.sidebarRemove}
+              <Button
                 onClick={() => handleRemove(page.id)}
                 disabled={remove.isPending || pageCount <= 1}
+                size="icon"
+                variant="destructive"
+                className="h-auto min-h-10"
                 title={pageCount <= 1 ? 'A presentation must have at least one page' : 'Delete page'}
                 aria-label={`Delete page ${index + 1}`}
               >
                 ×
-              </button>
+              </Button>
             </li>
           );
         })}
       </ol>
 
-      <button
-        type="button"
-        className={styles.addPageButton}
+      <Button
         onClick={handleAdd}
         disabled={add.isPending || atMax}
+        variant="secondary"
+        className="border-dashed"
         title={atMax ? `Max ${MAX_PAGES_PER_PRESENTATION} pages` : undefined}
       >
         {add.isPending ? 'Adding…' : '+ Add page'}
-      </button>
-      <p className={styles.pageCount}>
+      </Button>
+      <p className="m-0 text-center text-xs text-muted">
         {pageCount} / {MAX_PAGES_PER_PRESENTATION}
       </p>
     </aside>
