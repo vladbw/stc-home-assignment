@@ -17,7 +17,8 @@
       "Bash(curl -sS -X PATCH \"http://localhost:3000/api/presentations/8dff0e30-9c5e-45fe-aa41-eb5806c0ce31\" -H \"Content-Type: application/json\" -d '{\"title\":\"Welcome\"}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
       "Bash(curl -sS http://localhost:3000/api/presentations/122e301c-a421-4de9-a2cb-db2cc6d7a6a6)",
       "Bash(curl -sS -X DELETE \"http://localhost:3000/api/presentations/8dff0e30-9c5e-45fe-aa41-eb5806c0ce31\" -o /dev/null -w \"status=%{http_code}\\\\n\")",
-      "Bash(curl -sS -X DELETE \"http://localhost:3000/api/presentations/00000000-0000-4000-8000-000000000000\" -w \"\\\\nstatus=%{http_code}\\\\n\")"
+      "Bash(curl -sS -X DELETE \"http://localhost:3000/api/presentations/00000000-0000-4000-8000-000000000000\" -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(grep -i \"media\\\\|head\\\\|forbidden\\\\|503\\\\|500\" /tmp/sts-backend.log | tail -20)"
     ]
   }
 }

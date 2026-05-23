@@ -4,6 +4,7 @@ import { registerErrorHandler } from './errors';
 import { presentationRoutes } from './routes/presentations';
 import { pageRoutes } from './routes/pages';
 import { contentRoutes } from './routes/content';
+import { mediaRoutes } from './routes/media';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: true });
@@ -19,6 +20,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(presentationRoutes, { prefix: '/api' });
   await app.register(pageRoutes, { prefix: '/api' });
   await app.register(contentRoutes, { prefix: '/api' });
+  await app.register(mediaRoutes, { prefix: '/api' });
 
   return app;
 }
