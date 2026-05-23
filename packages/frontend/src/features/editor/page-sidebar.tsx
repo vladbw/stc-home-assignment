@@ -11,6 +11,8 @@ type Props = {
 export function PageSidebar({ presentation }: Props) {
   const activePageId = useEditorStore((s) => s.activePageId);
   const setActivePage = useEditorStore((s) => s.setActivePage);
+  const isSidebarOpen = useEditorStore((s) => s.isSidebarOpen);
+  const setSidebarOpen = useEditorStore((s) => s.setSidebarOpen);
 
   const add = useAddPage(presentation.id);
   const remove = useDeletePage(presentation.id);
@@ -20,8 +22,18 @@ export function PageSidebar({ presentation }: Props) {
 
   const handleAdd = () => {
     add.mutate(undefined, {
-      onSuccess: (newPage) => setActivePage(newPage.id),
+      onSuccess: (newPage) => {
+        setActivePage(newPage.id);
+        setSidebarOpen(false);
+      },
     });
+  };
+
+  const handleSelect = (pageId: string) => {
+    setActivePage(pageId);
+    // Auto-dismiss the drawer on mobile after picking a page. No-op on
+    // desktop because `isSidebarOpen` doesn't affect rendering there.
+    setSidebarOpen(false);
   };
 
   const handleRemove = (pageId: string) => {
@@ -40,7 +52,16 @@ export function PageSidebar({ presentation }: Props) {
 
   return (
     <aside
-      className="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border bg-panel px-3 py-4"
+      className={cn(
+        // Layout (applies in both modes)
+        'flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border bg-panel px-3 py-4',
+        // Mobile: off-canvas drawer absolutely positioned inside the
+        // workspace area. The header + toolbar stay reachable above.
+        'absolute inset-y-0 left-0 z-50 w-64 transition-transform duration-200',
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+        // Desktop (md+): grid child, static, full natural width.
+        'md:static md:z-auto md:w-auto md:translate-x-0 md:transition-none',
+      )}
       aria-label="Pages"
     >
       <ol className="grid list-none gap-2 p-0 m-0">
@@ -54,7 +75,7 @@ export function PageSidebar({ presentation }: Props) {
                   'min-h-10 flex-1 rounded-control border border-border bg-control px-3 py-2 text-left text-sm text-foreground transition hover:border-accent/45 hover:bg-control-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/15',
                   isActive && 'border-accent/55 bg-control-hover font-semibold text-accent',
                 )}
-                onClick={() => setActivePage(page.id)}
+                onClick={() => handleSelect(page.id)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 Page {index + 1}

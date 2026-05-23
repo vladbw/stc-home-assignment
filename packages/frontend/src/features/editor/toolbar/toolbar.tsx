@@ -5,6 +5,7 @@ import { ToolbarDivider } from './divider';
 import { ToolbarHistoryGroup } from './history-group';
 import { ToolbarPageBgControl } from './page-bg-control';
 import { ToolbarTextStyleGroup } from './text-style-group';
+import { SidebarToggleButton } from '../sidebar-toggle-button';
 
 type Props = {
   presentationId: string;
@@ -25,7 +26,8 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
       className="flex flex-wrap items-center gap-2 border-b border-border bg-panel-raised px-4 py-3"
       role="toolbar"
       aria-label="Editor tools"
-    >
+    > 
+      <SidebarToggleButton />
       <ToolbarHistoryGroup presentationId={presentationId} />
       <ToolbarDivider />
       <ToolbarAddGroup presentationId={presentationId} activePage={activePage} />

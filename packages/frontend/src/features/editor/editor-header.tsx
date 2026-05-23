@@ -6,7 +6,7 @@ type Props = {
   presentation: PresentationDetail;
 };
 
-/** Editor route header: back link, presentation title, Present button. */
+/** Editor route header: back link, mobile pages toggle, title, Present button. */
 export function EditorHeader({ presentation }: Props) {
   return (
     <header className="flex items-center gap-3 border-b border-border bg-panel-raised px-4 py-3">
