@@ -5,12 +5,10 @@
   "installCommand": "npm install",
   "rewrites": [
     {
-      "comment": "Proxy /api/* to the Railway backend so the browser sees a same-origin app — no CORS preflight needed.",
       "source": "/api/:path*",
-      "destination": "https://backend-production-0c3a.up.railway.app"
+      "destination": "https://backend-production-0c3a.up.railway.app/api/:path*"
     },
     {
-      "comment": "SPA fallback — any non-asset, non-API path serves index.html so React Router can take over.",
       "source": "/(.*)",
       "destination": "/index.html"
     }
