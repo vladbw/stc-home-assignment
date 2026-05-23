@@ -307,28 +307,22 @@ function MediaContent({ item }: { item: ContentResponse }) {
         src={media.url}
         alt={media.originalFilename}
         draggable={false}
-        className={`${styles.mediaContent} ${styles.mediaContentImage}`}
+        className={styles.mediaContent}
       />
     );
   }
 
-  // Video:
-  //  - `controls` so the user has a visible play button (and so they can
-  //    tell at a glance that this is a video, not a black box).
-  //  - `preload="auto"` so the browser actually loads enough data to paint
-  //    the first frame. With `preload="metadata"` the element shows nothing
-  //    until playback starts, which looks like a broken element.
-  //  - On `loadedmetadata`, nudge `currentTime` past 0. Some browsers won't
-  //    composite a frame until time has advanced; this guarantees a visible
-  //    poster-like first frame even when paused.
+  // Editor-mode video: static first-frame preview, no controls.
+  // Playback happens in presentation mode. We nudge currentTime past 0 to
+  // force the browser to actually composite a frame instead of showing a
+  // black box.
   return (
     <video
       src={media.url}
-      controls
       muted
       preload="auto"
       playsInline
-      className={`${styles.mediaContent} ${styles.mediaContentVideo}`}
+      className={styles.mediaContent}
       onLoadedMetadata={(e) => {
         const v = e.currentTarget;
         if (v.currentTime === 0) v.currentTime = 0.001;

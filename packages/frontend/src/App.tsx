@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { queryClient } from './services/query-client';
 import { PresentationsListRoute } from './routes/presentations-list-route';
 import { EditorRoute } from './routes/editor-route';
+import { PresentationRoute } from './routes/presentation-route';
 
 export function App() {
   return (
@@ -12,6 +13,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<PresentationsListRoute />} />
           <Route path="/presentations/:id" element={<EditorRoute />} />
+          <Route path="/presentations/:id/present" element={<PresentationRoute />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />

@@ -208,35 +208,22 @@
 
 /* Media content -------------------------------------------------------- */
 
+/*
+ * Editor-mode rendering of images and videos. Pointer events are disabled
+ * so every pointerdown lands on the outer .contentItem (drag handler).
+ *
+ * Videos render as a static first-frame "poster" in the editor — they're
+ * played in presentation mode instead. This avoids the conflict between
+ * the native video scrubber's pointer events and the item's drag capture.
+ */
 .mediaContent {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  pointer-events: none;
   user-select: none;
   display: block;
   background: rgba(0, 0, 0, 0.04);
-}
-
-/*
- * Images: pointer-events disabled so a click never lands on the <img>;
- * the outer .contentItem is always the pointerdown target → its drag
- * handler runs cleanly.
- */
-.mediaContentImage {
-  pointer-events: none;
-}
-
-/*
- * Videos: pointer-events enabled so the native controls (play, mute,
- * fullscreen) work. Drag still works because pointerdown bubbles to the
- * outer .contentItem, which captures the pointer for the gesture.
- *
- * Known limitation: scrubbing the timeline conflicts with item-drag —
- * once the outer div captures the pointer, the scrubber stops receiving
- * pointermove events.
- */
-.mediaContentVideo {
-  pointer-events: auto;
 }
 
 .mediaLoading {

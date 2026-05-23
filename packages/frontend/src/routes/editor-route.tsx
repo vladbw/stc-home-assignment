@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePresentationDetail } from '../queries/presentations';
 import { Canvas } from '../features/editor/canvas';
@@ -16,13 +16,21 @@ export function EditorRoute() {
   const selectedContentId = useEditorStore((s) => s.selectedContentId);
   const reset = useEditorStore((s) => s.reset);
 
-  // Reset all editor state whenever we navigate between presentations.
+  // Reset editor state only when navigating between *different* presentations.
+  // We keep state across editor↔presentation hops so the user returns to the
+  // same slide after a presentation. On initial mount, prevIdRef === id so
+  // no reset fires.
+  const prevIdRef = useRef(id);
   useEffect(() => {
-    reset();
+    if (prevIdRef.current !== id) {
+      reset();
+      prevIdRef.current = id;
+    }
   }, [id, reset]);
 
   // Keep the active page id valid against the latest data. If the current
-  // active page disappears (e.g. just deleted), fall back to the first page.
+  // active page disappears (e.g. just deleted, or we just navigated to a
+  // presentation that doesn't contain that page), fall back to the first.
   useEffect(() => {
     if (!presentation) return;
     const stillExists = presentation.pages.some((p) => p.id === activePageId);
@@ -62,6 +70,12 @@ export function EditorRoute() {
       <header className={styles.header}>
         <Link to="/">←</Link>
         <h1 className={styles.title}>{presentation.title}</h1>
+        <Link
+          to={`/presentations/${presentation.id}/present`}
+          className={styles.presentButton}
+        >
+          ▶ Present
+        </Link>
       </header>
       <Toolbar
         presentationId={presentation.id}
