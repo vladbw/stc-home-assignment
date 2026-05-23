@@ -4,6 +4,7 @@ import { usePresentationDetail } from '../queries/presentations';
 import { Canvas } from '../features/editor/canvas';
 import { PageSidebar } from '../features/editor/page-sidebar';
 import { Toolbar } from '../features/editor/toolbar';
+import { useEditorKeybindings } from '../features/editor/use-editor-keybindings';
 import { useEditorStore } from '../stores/editor-store';
 import { useHistoryStore } from '../stores/history-store';
 import styles from './editor-route.module.css';
@@ -41,6 +42,8 @@ export function EditorRoute() {
       setActivePage(presentation.pages[0]?.id ?? null);
     }
   }, [presentation, activePageId, setActivePage]);
+
+  useEditorKeybindings(id, presentation);
 
   if (isLoading) {
     return (

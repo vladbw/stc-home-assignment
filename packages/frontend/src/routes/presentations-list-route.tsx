@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useCallback, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { PresentationListItem } from '@sts/shared';
+import toast from 'react-hot-toast';
 import {
   useCreatePresentation,
   useDeletePresentation,
@@ -8,6 +9,7 @@ import {
   useRenamePresentation,
 } from '../queries/presentations';
 import styles from './presentations-list-route.module.css';
+import { usePresentationsListKeybindings } from './use-presentations-list-keybindings';
 
 export function PresentationsListRoute() {
   return (
@@ -23,16 +25,28 @@ export function PresentationsListRoute() {
 
 function CreateForm() {
   const [title, setTitle] = useState('');
-  const create = useCreatePresentation();
+  const { isPending, mutate: createPresentation } = useCreatePresentation();
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const createFromTitle = useCallback(() => {
+    if (isPending) return;
+
     const trimmed = title.trim();
-    if (!trimmed) return;
-    create.mutate(
+    if (!trimmed) {
+      toast.error('The new presentation needs a title!');
+      return;
+    }
+
+    createPresentation(
       { title: trimmed },
       { onSuccess: () => setTitle('') },
     );
+  }, [createPresentation, isPending, title]);
+
+  usePresentationsListKeybindings(createFromTitle);
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    createFromTitle();
   };
 
   return (
@@ -44,8 +58,8 @@ function CreateForm() {
         onChange={(e) => setTitle(e.target.value)}
         maxLength={200}
       />
-      <button type="submit" disabled={create.isPending || !title.trim()}>
-        {create.isPending ? 'Creating…' : 'Create'}
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Creating…' : 'Create'}
       </button>
     </form>
   );
