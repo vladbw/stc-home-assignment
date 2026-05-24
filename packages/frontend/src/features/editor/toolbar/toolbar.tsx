@@ -3,9 +3,10 @@ import { ToolbarAddGroup } from './add-group';
 import { ToolbarDeleteButton } from './delete-button';
 import { ToolbarDivider } from './divider';
 import { ToolbarHistoryGroup } from './history-group';
-import { ToolbarPageBgControl } from './page-bg-control';
 import { ToolbarTextStyleGroup } from './text-style-group';
 import { SidebarToggleButton } from '../sidebar-toggle-button';
+import { useEditorActions } from '../use-editor-actions';
+import { DebouncedColorPicker } from '../../../components/ui/debounced-color-picker';
 
 type Props = {
   presentationId: string;
@@ -13,14 +14,11 @@ type Props = {
   selectedItem: ContentResponse | null;
 };
 
-/**
- * Editor toolbar — pure composition. Each group is a small component that
- * owns its own state and dispatches through the action layer.
- */
 export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
   const isTextSelected = selectedItem?.type === 'text';
   const showPageControls = !selectedItem && !!activePage;
-
+  const actions = useEditorActions(presentationId);
+  
   return (
     <div
       className="flex flex-wrap items-center gap-2 border-b border-border bg-panel-raised px-4 py-3"
@@ -43,7 +41,12 @@ export function Toolbar({ presentationId, activePage, selectedItem }: Props) {
       {showPageControls && (
         <>
           <ToolbarDivider />
-          <ToolbarPageBgControl presentationId={presentationId} page={activePage} />
+          <DebouncedColorPicker
+                label="Page background"
+                title="Page background color"
+                value={activePage.backgroundColor}
+                onCommit={(newColor) => actions.patchPage(activePage, { backgroundColor: newColor })}
+          />
         </>
       )}
     </div>

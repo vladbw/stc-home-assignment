@@ -4,6 +4,7 @@ import {
   type TextStyle,
 } from '@sts/shared';
 import { Button } from '../../../components/ui/button';
+import { DebouncedColorPicker } from '../../../components/ui/debounced-color-picker';
 import { useEditorActions } from '../use-editor-actions';
 
 type Props = {
@@ -12,9 +13,9 @@ type Props = {
 };
 
 /**
- * B / I / Color controls. Visible only when a text content item is selected.
- * Each toggle/picker dispatches through the action layer so the change is
- * captured by the undo stack.
+ * Bold/italic toggles commit immediately. The color picker is debounced
+ * via the <DebouncedColorPicker> so a single pick produces one
+ * mutation, not one per dragged pixel (in the screen with the circular palette).
  */
 export function ToolbarTextStyleGroup({ presentationId, item }: Props) {
   const actions = useEditorActions(presentationId);
@@ -29,9 +30,6 @@ export function ToolbarTextStyleGroup({ presentationId, item }: Props) {
 
   const toggleBold = () => patchStyle({ ...currentStyle, bold: !currentStyle.bold });
   const toggleItalic = () => patchStyle({ ...currentStyle, italic: !currentStyle.italic });
-  const onColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    patchStyle({ ...currentStyle, color: e.target.value.toUpperCase() });
-  };
 
   return (
     <>
@@ -55,18 +53,12 @@ export function ToolbarTextStyleGroup({ presentationId, item }: Props) {
       >
         I
       </Button>
-      <label
-        className="inline-flex cursor-pointer items-center gap-2 text-sm text-muted"
+      <DebouncedColorPicker
+        label="Color"
         title="Text color"
-      >
-        <span>Color</span>
-        <input
-          type="color"
-          value={currentStyle.color.toLowerCase()}
-          onChange={onColorChange}
-          className="h-8 w-10 cursor-pointer border border-border bg-transparent p-0"
-        />
-      </label>
+        value={currentStyle.color}
+        onCommit={(newColor) => patchStyle({ ...currentStyle, color: newColor })}
+      />
     </>
   );
 }
