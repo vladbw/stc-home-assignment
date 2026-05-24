@@ -181,6 +181,7 @@ export function MediaPicker({ kind, onClose, onPick }: Props) {
                 >
                   {m.contentType.startsWith('image/') ? (
                     <img
+                      loading='lazy'
                       src={m.url ?? ''}
                       alt={m.originalFilename}
                       className={styles.libraryThumb}

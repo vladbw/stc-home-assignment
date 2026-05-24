@@ -310,6 +310,7 @@ function MediaContent({ item }: { item: ContentResponse }) {
   if (item.type === 'image') {
     return (
       <img
+        loading='lazy'
         src={media.url}
         alt={media.originalFilename}
         draggable={false}

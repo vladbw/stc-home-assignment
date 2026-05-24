@@ -47,15 +47,18 @@ export function useUpdateContent(presentationId: string) {
       await qc.cancelQueries({ queryKey: detailKey });
       const previous = qc.getQueryData<PresentationDetail>(detailKey);
 
+      // skip the page wrap when no item in that page matches
       if (previous) {
         qc.setQueryData<PresentationDetail>(detailKey, {
           ...previous,
-          pages: previous.pages.map((page) => ({
+          pages: previous.pages.map((page) => { 
+             if (!page.content.some((c) => c.id === id)) return page;
+            return ({
             ...page,
             content: page.content.map((item) =>
               item.id === id ? { ...item, ...input } : item,
             ),
-          })),
+          })}),
         });
       }
 
