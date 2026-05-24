@@ -5,7 +5,7 @@ import {
 } from '@sts/shared';
 import { Button } from '../../../generic-components/button';
 import { DebouncedColorPicker } from '../../../generic-components/debounced-color-picker';
-import { useEditorActions } from '../use-editor-actions';
+import { useEditorActions } from '../editor/use-editor-actions';
 
 type Props = {
   presentationId: string;

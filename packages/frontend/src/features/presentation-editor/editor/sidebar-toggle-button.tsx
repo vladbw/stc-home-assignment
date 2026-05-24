@@ -1,5 +1,5 @@
-import { Button } from '../../generic-components/button';
-import { useEditorStore } from '../../stores/editor-store';
+import { Button } from '../../../generic-components/button';
+import { useEditorStore } from '../../../stores/editor-store';
 
 /**
  * Hamburger / close toggle for the pages drawer. Rendered only below the

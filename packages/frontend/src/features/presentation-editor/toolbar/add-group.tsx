@@ -7,9 +7,9 @@ import {
 } from '@sts/shared';
 import { Button } from '../../../generic-components/button';
 import { useEditorStore } from '../../../stores/editor-store';
-import { fitDimensionsToBox } from '../media-dimensions';
-import { MediaPicker, type PickedMedia } from '../media-picker';
-import { useEditorActions } from '../use-editor-actions';
+import { fitDimensionsToBox } from '../editor/media-dimensions';
+import { MediaPicker, type PickedMedia } from '../editor/media-picker';
+import { useEditorActions } from '../editor/use-editor-actions';
 
 type Props = {
   presentationId: string;

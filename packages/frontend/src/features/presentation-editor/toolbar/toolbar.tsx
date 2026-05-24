@@ -4,8 +4,8 @@ import { ToolbarDeleteButton } from './delete-button';
 import { ToolbarDivider } from './divider';
 import { ToolbarHistoryGroup } from './history-group';
 import { ToolbarTextStyleGroup } from './text-style-group';
-import { SidebarToggleButton } from '../sidebar-toggle-button';
-import { useEditorActions } from '../use-editor-actions';
+import { SidebarToggleButton } from '../editor/sidebar-toggle-button';
+import { useEditorActions } from '../editor/use-editor-actions';
 import { DebouncedColorPicker } from '../../../generic-components/debounced-color-picker';
 
 type Props = {

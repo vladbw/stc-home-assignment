@@ -17,8 +17,8 @@ import {
   type PageResponse,
   type TextStyle,
 } from '@sts/shared';
-import { useMediaItem } from '../../queries/media';
-import { useEditorStore } from '../../stores/editor-store';
+import { useMediaItem } from '../../../queries/media';
+import { useEditorStore } from '../../../stores/editor-store';
 import { useDrag } from './use-drag';
 import { useEditorActions } from './use-editor-actions';
 import { useFitScale } from './use-fit-scale';

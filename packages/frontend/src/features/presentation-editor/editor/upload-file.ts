@@ -1,4 +1,4 @@
-import { mediaService } from '../../services/media';
+import { mediaService } from '../../../services/media';
 
 /**
  * Three-step upload pipeline, mirroring the backend's design from phase 5:

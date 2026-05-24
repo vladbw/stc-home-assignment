@@ -1,7 +1,7 @@
 import { type ContentResponse } from '@sts/shared';
 import { Button } from '../../../generic-components/button';
 import { useEditorStore } from '../../../stores/editor-store';
-import { useEditorActions } from '../use-editor-actions';
+import { useEditorActions } from '../editor/use-editor-actions';
 
 type Props = {
   presentationId: string;

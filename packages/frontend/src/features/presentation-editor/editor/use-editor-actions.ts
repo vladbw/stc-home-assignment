@@ -10,9 +10,9 @@ import {
   useCreateContent,
   useDeleteContent,
   useUpdateContent,
-} from '../../queries/content';
-import { useUpdatePage } from '../../queries/pages';
-import { useHistoryStore, type Command } from '../../stores/history-store';
+} from '../../../queries/content';
+import { useUpdatePage } from '../../../queries/pages';
+import { useHistoryStore, type Command } from '../../../stores/history-store';
 
 /**
  * Unified action layer for the editor.

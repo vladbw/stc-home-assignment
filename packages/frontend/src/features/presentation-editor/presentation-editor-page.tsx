@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePresentationDetail } from '../../queries/presentations';
-import { EditorHeader } from '../../features/editor/editor-header';
-import { EditorWorkspace } from '../../features/editor/editor-workspace';
-import { Toolbar } from '../../features/editor/toolbar';
-import { useEditorKeybindings } from '../../features/editor/use-editor-keybindings';
+import { EditorHeader } from './editor/editor-header';
+import { EditorWorkspace } from './editor/editor-workspace';
+import { Toolbar } from './toolbar';
+import { useEditorKeybindings } from './editor/use-editor-keybindings';
 import { buttonVariants } from '../../generic-components/button';
 import { PageShell } from '../../generic-components/page-shell';
 import { useEditorStore } from '../../stores/editor-store';

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { PresentationDetail } from '@sts/shared';
-import { buttonVariants } from '../../generic-components/button';
+import { buttonVariants } from '../../../generic-components/button';
 
 type Props = {
   presentation: PresentationDetail;

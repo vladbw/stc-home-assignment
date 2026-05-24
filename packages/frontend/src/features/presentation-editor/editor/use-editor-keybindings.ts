@@ -1,8 +1,8 @@
 import { MAX_PAGES_PER_PRESENTATION, type PresentationDetail } from '@sts/shared';
-import { useAddPage } from '../../queries/pages';
-import { useShortcut } from '../../shortcuts/use-shortcut';
-import { useEditorStore } from '../../stores/editor-store';
-import { useHistoryStore } from '../../stores/history-store';
+import { useAddPage } from '../../../queries/pages';
+import { useShortcut } from '../../../shortcuts/use-shortcut';
+import { useEditorStore } from '../../../stores/editor-store';
+import { useHistoryStore } from '../../../stores/history-store';
 import { useEditorActions } from './use-editor-actions';
 
 /**

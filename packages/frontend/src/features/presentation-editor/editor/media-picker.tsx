@@ -7,7 +7,7 @@ import {
   VIDEO_MIME_TYPES,
   type MediaResponse,
 } from '@sts/shared';
-import { useMediaList } from '../../queries/media';
+import { useMediaList } from '../../../queries/media';
 import { getMediaDimensions, type NaturalDimensions } from './media-dimensions';
 import { uploadFile } from './upload-file';
 import styles from './media-picker.module.css';

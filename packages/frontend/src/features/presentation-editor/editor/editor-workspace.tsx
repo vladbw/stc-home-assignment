@@ -1,5 +1,5 @@
 import type { PageResponse, PresentationDetail } from '@sts/shared';
-import { useEditorStore } from '../../stores/editor-store';
+import { useEditorStore } from '../../../stores/editor-store';
 import { Canvas } from './canvas';
 import { PageSidebar } from './page-sidebar';
 
