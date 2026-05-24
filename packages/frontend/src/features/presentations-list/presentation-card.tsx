@@ -100,7 +100,7 @@ export function PresentationCard({ presentation }: Props) {
           <p>Created at {new Date(presentation.createdAt).toLocaleDateString()}</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 flex-col">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Button type="button" onClick={() => setRenaming(true)}>
           Rename
         </Button>

@@ -4,7 +4,6 @@ import { TextStyleSchema, type TextStyle } from './style';
 export const ContentTypeSchema = z.enum(['text', 'image', 'video']);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
 
-/** Canvas dimensions (logical, in pixels). Per assignment spec. */
 export const CANVAS_WIDTH = 1024;
 export const CANVAS_HEIGHT = 768;
 
@@ -12,11 +11,6 @@ export const CoordSchema = z.number().finite();
 export const SizeSchema = z.number().finite().positive();
 
 const BaseContentCreate = z.object({
-  /**
-   * Optional client-supplied ID. Used by undo/redo so a re-created content
-   * item ends up with the same ID it had before, keeping subsequent commands
-   * in the history stack referring to the correct row.
-   */
   id: z.string().uuid().optional(),
   x: CoordSchema,
   y: CoordSchema,
@@ -54,12 +48,6 @@ export const CreateContentSchema = z.discriminatedUnion('type', [
 ]);
 export type CreateContentInput = z.infer<typeof CreateContentSchema>;
 
-/**
- * Partial update. Type and mediaId are immutable — to swap a media item,
- * delete and create a new content item.
- *
- * Style is replace-not-merge: if provided, must be the complete TextStyle.
- */
 export const UpdateContentSchema = z.object({
   x: CoordSchema.optional(),
   y: CoordSchema.optional(),
@@ -71,7 +59,6 @@ export const UpdateContentSchema = z.object({
 });
 export type UpdateContentInput = z.infer<typeof UpdateContentSchema>;
 
-/** Shape returned by the API for a content item. */
 export type ContentResponse = {
   id: string;
   pageId: string;

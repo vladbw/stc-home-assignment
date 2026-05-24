@@ -1,13 +1,3 @@
-/**
- * Low-level HTTP client. Every backend call goes through this.
- *
- * Responsibilities:
- *  - prepend `/api` (so requests go through the Vite proxy in dev)
- *  - JSON content-type when there's a body
- *  - parse JSON responses (or undefined on 204)
- *  - translate non-2xx responses to a typed `ApiError`
- */
-
 export class ApiError extends Error {
   constructor(
     public readonly status: number,

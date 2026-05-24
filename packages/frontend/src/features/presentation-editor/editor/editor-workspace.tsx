@@ -1,6 +1,6 @@
 import type { PageResponse, PresentationDetail } from '@sts/shared';
 import { useEditorStore } from '../../../stores/editor-store';
-import { Canvas } from './canvas';
+import { Canvas } from './canvas/canvas';
 import { PageSidebar } from './page-sidebar';
 
 type Props = {

@@ -1,9 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 
+/**
+ * Helper script to seed some data into the db
+ */
+
 const db = new PrismaClient();
 
 async function main() {
-  // Idempotent: wipe the seeded presentation if it exists, then recreate it.
+  // Wipe the seeded presentation if it exists, then recreate it.
   await db.presentation.deleteMany({ where: { title: 'Welcome' } });
 
   await db.presentation.create({

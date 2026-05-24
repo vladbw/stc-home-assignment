@@ -12,8 +12,7 @@ type UseShortcutOptions = {
 
 /**
  * Bind a handler to a shortcut id. The handler and enabled predicate are
- * read fresh on every dispatch (via refs), so you can pass inline closures
- * without worrying about stale captures.
+ * read fresh on every dispatch (via refs).
  */
 export function useShortcut(
   id: ShortcutId,

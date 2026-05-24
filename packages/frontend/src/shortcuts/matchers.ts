@@ -34,14 +34,6 @@ function modifierActive(mod: Modifier, e: KeyboardEvent): boolean {
 
 const ALL_MODIFIERS: readonly Modifier[] = ['mod', 'shift', 'alt'];
 
-/**
- * Exact chord match: every modifier required must be active, every
- * modifier NOT required must be inactive. (So Cmd+Z does not fire when
- * Cmd+Shift+Z is pressed — that distinction is how undo vs redo coexist.)
- *
- * Key matching is case-insensitive for single letters and case-sensitive
- * for named keys like 'ArrowLeft' or 'Escape'.
- */
 export function matchesChord(e: KeyboardEvent, chord: Chord): boolean {
   const eventKey = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   const chordKey = chord.key.length === 1 ? chord.key.toLowerCase() : chord.key;

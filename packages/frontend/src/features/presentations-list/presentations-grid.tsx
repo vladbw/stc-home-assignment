@@ -2,6 +2,7 @@ import { Card } from '../../generic-components/card';
 import { usePresentations } from '../../queries/presentations';
 import { PresentationCard } from './presentation-card';
 
+// The actual container for the list of presentation cards
 export function PresentationsGrid() {
   const { data, isLoading, error } = usePresentations();
 

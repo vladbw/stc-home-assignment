@@ -9,11 +9,6 @@ import type {
  * A serializable description of a single state-changing operation. The undo
  * stack stores `{ forward, inverse }` pairs; `forward` is what the user did,
  * `inverse` is what gets executed when they hit undo. Redo replays `forward`.
- *
- * The choice to make this a pure-data structure (rather than a closure) means
- * the same record can travel through the redo stack and be replayed
- * identically. It also means we *can't* store any in-memory references —
- * everything needed to re-execute must be in the record itself.
  */
 export type Command =
   | { type: 'createContent'; pageId: string; input: CreateContentInput }
@@ -29,11 +24,9 @@ interface HistoryState {
   undoStack: HistoryAction[];
   redoStack: HistoryAction[];
 
-  /** User performed a new action: push to undo, clear redo. */
   push: (action: HistoryAction) => void;
   popUndo: () => HistoryAction | null;
   popRedo: () => HistoryAction | null;
-  /** Used when undo/redo re-fills the opposite stack. Does NOT clear redo. */
   pushUndo: (action: HistoryAction) => void;
   pushRedo: (action: HistoryAction) => void;
   clear: () => void;

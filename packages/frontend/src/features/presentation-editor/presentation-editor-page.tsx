@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePresentationDetail } from '../../queries/presentations';
 import { EditorHeader } from './editor/editor-header';
@@ -43,11 +43,6 @@ export function PresentationEditorPage() {
   }, [presentation, activePageId, setActivePage]);
 
   useEditorKeybindings(id, presentation);
-
-  // Track previous-id so we only reset *between* presentations, not on every
-  // mount. Used by the cleanup logic above (which also fires on actual unmount).
-  const prevIdRef = useRef(id);
-  prevIdRef.current = id;
 
   if (isLoading) {
     return (

@@ -1,7 +1,6 @@
 /**
  * Logical modifier name. `mod` collapses ⌘ (Mac) and Ctrl (everywhere else)
- * into one cross-platform token — the dispatch service resolves it at
- * keydown time by sniffing the platform.
+ * into one cross-platform token.
  */
 export type Modifier = 'mod' | 'shift' | 'alt';
 
@@ -11,7 +10,6 @@ export type Chord = {
   readonly modifiers?: readonly Modifier[];
 };
 
-/** Scope is metadata only — see service.ts. */
 export type Scope = 'home' | 'editor' | 'presentation';
 
 export type ShortcutDef = {

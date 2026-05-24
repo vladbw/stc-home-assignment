@@ -2,14 +2,12 @@ import { SHORTCUTS, type ShortcutId } from './definitions';
 import { isMac } from './matchers';
 import type { Chord, Modifier } from './types';
 
-/** Symbol-only on Mac (⌘⇧Z), name + plus on Windows (Ctrl+Shift+Z). */
 const MODIFIER_LABEL: Record<Modifier, () => string> = {
   mod: () => (isMac ? '⌘' : 'Ctrl'),
   shift: () => (isMac ? '⇧' : 'Shift'),
   alt: () => (isMac ? '⌥' : 'Alt'),
 };
 
-/** Named keys → printable labels. */
 const KEY_LABEL: Record<string, string> = {
   ArrowLeft: '←',
   ArrowRight: '→',

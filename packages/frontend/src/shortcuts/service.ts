@@ -10,18 +10,6 @@ type Binding = {
   enabled: Predicate;
 };
 
-/**
- * One global keydown listener that dispatches to registered shortcut
- * handlers. Components opt in via the `useShortcut` hook; they don't
- * talk to this service directly.
- *
- * Iteration order is insertion order (Map semantics). At most one handler
- * may be registered per shortcut id at a time. When two shortcuts have
- * the same chord (e.g. `editor.deleteSelected` Delete vs
- * `editor.deleteSelectedAlt` Backspace), only one matches a given event
- * because the *keys* differ; same-key collisions across scopes don't
- * happen at runtime because only one route's hooks are mounted at a time.
- */
 class ShortcutService {
   private bindings = new Map<ShortcutId, Binding>();
   private listenerInstalled = false;

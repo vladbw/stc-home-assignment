@@ -54,9 +54,12 @@ export const pageRoutes: FastifyPluginAsync = async (app) => {
         select: { id: true },
       });
       const existingIds = new Set(existing.map((p) => p.id));
+      const pageIdSet = new Set(pageIds);
       const sameSet =
-        pageIds.length === existingIds.size && pageIds.every((id) => existingIds.has(id));
-      if (!sameSet) {
+        pageIdSet.size === pageIds.length &&
+        pageIdSet.size === existingIds.size &&
+        pageIds.every((id) => existingIds.has(id));
+        if (!sameSet) {
         throw badRequest('pageIds must exactly match existing pages of this presentation');
       }
 

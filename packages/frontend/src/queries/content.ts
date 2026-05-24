@@ -32,8 +32,7 @@ export function useCreateContent(presentationId: string) {
  * canvas reflects the change with zero latency, then reconcile with the
  * server response. On error, roll back.
  *
- * Used by drag/resize/style-toolbar — anywhere where waiting for a network
- * roundtrip would feel laggy.
+ * Used by drag/resize/style-toolbar
  */
 export function useUpdateContent(presentationId: string) {
   const qc = useQueryClient();

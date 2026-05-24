@@ -24,11 +24,6 @@ import { useHistoryStore, type Command } from '../../../stores/history-store';
  *
  * `undo()` / `redo()` simply pop and execute. Because commands are pure
  * data, redo replays the exact same operation that was originally requested.
- *
- * The returned methods and the returned object are memoized so consumers
- * that pass these to `React.memo`-wrapped children don't see spurious prop
- * changes on every render. The dependencies (`*.mutate` from TanStack
- * Query, Zustand store actions) are guaranteed-stable across renders.
  */
 export function useEditorActions(presentationId: string) {
   const createContent = useCreateContent(presentationId);

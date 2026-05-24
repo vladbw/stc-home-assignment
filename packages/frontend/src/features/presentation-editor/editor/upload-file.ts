@@ -1,12 +1,10 @@
 import { mediaService } from '../../../services/media';
 
 /**
- * Three-step upload pipeline, mirroring the backend's design from phase 5:
- *
- *   1. Reserve a Media row + signed PUT URL on our backend.
- *   2. PUT the file directly to S3 — via XHR rather than fetch, because
+ * 1. Reserve a Media row + signed PUT URL on our backend.
+ * 2. PUT the file directly to S3 — via XHR rather than fetch, because
  *      `fetch` has no upload-progress API.
- *   3. Confirm on our backend, which HEADs the S3 object and flips the
+ * 3. Confirm on our backend, which HEADs the S3 object and flips the
  *      Media row to `uploaded`.
  *
  * If step 2 fails, we explicitly POST /media/:id/cancel so the reserved

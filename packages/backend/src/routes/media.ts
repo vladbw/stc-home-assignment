@@ -16,7 +16,7 @@ const IdParams = z.object({ id: z.string().uuid() });
 const UPLOAD_URL_TTL_SECONDS = 300;
 const VIEW_URL_TTL_SECONDS = 3600;
 
-/** Map a Prisma Media row to the public response shape, including a fresh GET URL. */
+/** Map a Prisma Media row to the public response shape, including a fresh presigned s3 GET URL. */
 async function toMediaResponse(media: Media): Promise<MediaResponse> {
   const url = media.status === 'uploaded' ? await presignedGetUrl(media.s3Key, VIEW_URL_TTL_SECONDS) : null;
   return {
@@ -82,7 +82,7 @@ export const mediaRoutes: FastifyPluginAsync = async (app) => {
 
   /**
    * Verify the S3 object exists and matches what we reserved, then flip status
-   * to `uploaded`. Idempotent.
+   * to `uploaded`
    */
   app.post('/media/:id/confirm', async (req) => {
     const { id } = IdParams.parse(req.params);
@@ -133,10 +133,11 @@ export const mediaRoutes: FastifyPluginAsync = async (app) => {
     return toMediaResponse(media);
   });
 
-  /** List uploaded media for the library browser. Optional ?type=image|video filter. */
+  /** List uploaded media for the library browser. */
   app.get('/media', async (req) => {
     const { type } = ListMediaQuerySchema.parse(req.query);
 
+    // For demo purposes we do take 100, but a real app would have cursor pagination here
     const rows = await db.media.findMany({
       where: {
         status: 'uploaded',

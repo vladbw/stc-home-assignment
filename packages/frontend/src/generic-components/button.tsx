@@ -38,13 +38,6 @@ export const buttonVariants = cva(
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants> & {
-    /**
-     * Shortcut id whose chord gets folded into the `title` tooltip. Purely
-     * informational — the actual key handling is still wired up by the
-     * caller via `useShortcut`. Tooltips keep the button visually identical
-     * to non-shortcut buttons (and to button-styled `<Link>`s, which can't
-     * render inline chips).
-     */
     shortcut?: ShortcutId;
   };
 

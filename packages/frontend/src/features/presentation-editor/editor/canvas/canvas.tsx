@@ -1,11 +1,9 @@
 import {
   memo,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
 } from 'react';
 import {
   CANVAS_HEIGHT,
@@ -17,13 +15,14 @@ import {
   type PageResponse,
   type TextStyle,
 } from '@sts/shared';
-import { useMediaItem } from '../../../queries/media';
-import { useEditorStore } from '../../../stores/editor-store';
-import { useDrag } from './use-drag';
-import { useEditorActions } from './use-editor-actions';
-import { useFitScale } from './use-fit-scale';
-import { useResize, type ResizeCorner } from './use-resize';
-import styles from './editor.module.css';
+import { useMediaItem } from '../../../../queries/media';
+import { useEditorStore } from '../../../../stores/editor-store';
+import { useDrag } from '../use-drag';
+import { useEditorActions } from '../use-editor-actions';
+import { useFitScale } from '../../../../lib/use-fit-scale';
+import { useResize, type ResizeCorner } from '../use-resize';
+import styles from '../editor.module.css';
+import { TextEditView } from './text-edit-view';
 
 type Props = {
   page: PageResponse | null;
@@ -279,7 +278,7 @@ const ContentItemView = memo(function ContentItemView({
       onPointerUp={dragHandlers.onPointerUp}
       onPointerCancel={dragHandlers.onPointerCancel}
       onDoubleClick={onDoubleClick}
-      title={isText ? undefined : `${item.type} (phase 9)`}
+      title={isText ? undefined : `${item.type}`}
     >
       {body}
       {showHandles && (
@@ -365,85 +364,3 @@ function ResizeHandleView({
   );
 }
 
-/**
- * Inline text editor. Mounted in place of the read-only text div while the
- * item is being edited.
- *
- * Persistence is driven by the unmount cleanup, NOT by `onBlur`. This is
- * necessary because the parent unmounts this component synchronously when
- * the user does any of: click another content item, click outside the page,
- * change pages, navigate away. None of those cause the browser to fire a
- * blur event before the textarea is gone — relying on blur alone would drop
- * the user's edits in every one of those cases.
- *
- * The textarea auto-sizes to its content via `field-sizing: content`
- * (supported in modern Chromium / Safari; Firefox falls back gracefully).
- */
-function TextEditView({
-  item,
-  presentationId,
-  style,
-}: {
-  item: ContentResponse;
-  presentationId: string;
-  style: TextStyle;
-}) {
-  const endEdit = useEditorStore((s) => s.endEdit);
-  const actions = useEditorActions(presentationId);
-
-  const draftRef = useRef(item.text ?? '');
-  const cancelledRef = useRef(false);
-  const itemRef = useRef(item);
-  itemRef.current = item;
-  // Capture `actions` in a ref so the unmount cleanup can call the latest
-  // version (actions is recreated on each render).
-  const actionsRef = useRef(actions);
-  actionsRef.current = actions;
-
-  useEffect(() => {
-    return () => {
-      const value = draftRef.current;
-      if (!cancelledRef.current && value !== (itemRef.current.text ?? '')) {
-        actionsRef.current.patchContent(itemRef.current, { text: value });
-      }
-    };
-  }, []);
-
-  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    draftRef.current = e.target.value;
-  };
-
-  const onBlur = () => {
-    endEdit();
-  };
-
-  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelledRef.current = true;
-      endEdit();
-    }
-  };
-
-  return (
-    <textarea
-      autoFocus
-      defaultValue={item.text ?? ''}
-      onChange={onChange}
-      onBlur={onBlur}
-      onKeyDown={onKeyDown}
-      onPointerDown={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
-      className={styles.contentTextEditing}
-      style={{
-        left: item.x,
-        top: item.y,
-        zIndex: 9999,
-        fontSize: style.fontSize,
-        fontWeight: style.bold ? 700 : 400,
-        fontStyle: style.italic ? 'italic' : 'normal',
-        color: style.color,
-      }}
-    />
-  );
-}

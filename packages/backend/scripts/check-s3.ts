@@ -1,10 +1,6 @@
 /**
- * S3 connectivity check.
- *
+ * S3 connectivity helper check.
  * Verifies that the AWS credentials in .env can talk to the configured bucket
- * end-to-end: HEAD bucket, PUT/GET/DELETE via the SDK, generate presigned URLs,
- * and round-trip an upload via a presigned PUT.
- *
  * Run with:  npm run check:s3 -w backend
  */
 import {

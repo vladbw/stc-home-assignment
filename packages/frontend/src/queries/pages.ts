@@ -43,7 +43,6 @@ export function useDeletePage(presentationId: string) {
 /**
  * Optimistic update for page-level fields (currently backgroundColor).
  * Mirrors the pattern in useUpdateContent: patch cache → roll back on error
- * → invalidate on settle.
  */
 export function useUpdatePage(presentationId: string) {
   const qc = useQueryClient();

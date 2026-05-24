@@ -6,7 +6,6 @@ import type {
 } from '@sts/shared';
 import { apiFetch } from './api-client';
 
-/** Minimal presentation shape returned by PATCH and the empty-update branch. */
 export type PresentationBasic = {
   id: string;
   title: string;

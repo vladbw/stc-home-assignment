@@ -5,9 +5,7 @@ type KbdProps = HTMLAttributes<HTMLElement>;
 
 /**
  * Inline keyboard-shortcut hint, e.g. the `⌘Z` chip rendered next to a
- * button label. Sized smaller than the surrounding text so it visually
- * recedes; styled with the same `bg-control` / `border-border` tokens as
- * other UI primitives.
+ * button label.
  */
 export function Kbd({ className, ...props }: KbdProps) {
   return (

@@ -57,7 +57,6 @@ export const contentRoutes: FastifyPluginAsync = async (app) => {
   });
 
   /**
-   * Partial update. `type` and `mediaId` are not in the schema and cannot change.
    * If `style` is provided it must be a complete TextStyle (replace, not merge).
    */
   app.patch('/content/:id', async (req) => {

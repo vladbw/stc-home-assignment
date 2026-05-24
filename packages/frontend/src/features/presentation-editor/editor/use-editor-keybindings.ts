@@ -29,7 +29,7 @@ export function useEditorKeybindings(
 
   const createPage = () => {
     if (!presentationId || isAddingPage || atMaxPages) return;
-    addPage(undefined, { onSuccess: (newPage) => setActivePage(newPage.id) });
+    addPage();
   };
 
   const navigatePage = (direction: -1 | 1) => {

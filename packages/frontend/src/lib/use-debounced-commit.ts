@@ -7,9 +7,6 @@ import { useCallback, useEffect, useRef } from 'react';
  * a fresh timer; only the latest `fn` ends up running, `delay` ms after the
  * last call. `flush()` runs the pending commit immediately (used on unmount
  * so a draft isn't dropped if the user navigates away mid-pick).
- *
- * The commit closure is captured fresh on every `schedule` call, so the
- * caller can rely on it reading the freshest cache snapshot at fire time.
  */
 export function useDebouncedCommit(delay: number) {
   const timerRef = useRef<number | null>(null);

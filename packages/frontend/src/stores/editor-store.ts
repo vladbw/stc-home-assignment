@@ -2,7 +2,6 @@ import { create } from 'zustand';
 
 /**
  * Cross-component UI state for the editor.
- *
  * Server data still lives in TanStack Query. This store only holds transient
  * UI state shared between toolbar / sidebar / canvas / content items.
  */

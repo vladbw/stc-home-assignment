@@ -3,7 +3,6 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
-  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -23,11 +22,6 @@ export const s3 = new S3Client({
   },
 });
 
-/**
- * Generate a presigned PUT URL. The signed request locks Content-Type and
- * Content-Length: the browser must send a PUT with both headers matching
- * exactly what was signed, or S3 rejects the upload.
- */
 export async function presignedPutUrl(
   key: string,
   contentType: string,
@@ -53,15 +47,6 @@ export async function presignedGetUrl(key: string, expiresIn = 3600): Promise<st
 
 export type HeadResult = { size: number; contentType: string | undefined };
 
-/**
- * HEAD an object. Returns null if it doesn't exist; throws on other errors.
- *
- * Note: our IAM policy intentionally omits `s3:ListBucket`, so S3 returns
- * 403 (not 404) when the object isn't there — it can't distinguish "missing"
- * from "forbidden" without list permission, by design. Since we know our
- * credentials are valid (the same client signs PUT/GET successfully), both
- * 403 and 404 here mean "object isn't in the bucket".
- */
 export async function headObject(key: string): Promise<HeadResult | null> {
   try {
     const res = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
@@ -75,6 +60,7 @@ export async function headObject(key: string): Promise<HeadResult | null> {
   }
 }
 
-export async function deleteS3Object(key: string): Promise<void> {
-  await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
-}
+// Not done for this assignment, but a real app needs a way to delete existing media
+// export async function deleteS3Object(key: string): Promise<void> {
+//   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+// }

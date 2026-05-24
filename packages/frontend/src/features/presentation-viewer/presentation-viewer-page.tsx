@@ -12,7 +12,7 @@ import { useMediaItem } from '../../queries/media';
 import { usePresentationDetail } from '../../queries/presentations';
 import { useShortcut } from '../../shortcuts/use-shortcut';
 import { useEditorStore } from '../../stores/editor-store';
-import { useFitScale} from '../presentation-editor/editor/use-fit-scale';
+import { useFitScale} from '../../lib/use-fit-scale';
 import styles from './presentation-viewer.module.css';
 
 
