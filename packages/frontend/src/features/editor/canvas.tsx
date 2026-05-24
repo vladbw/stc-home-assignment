@@ -1,4 +1,5 @@
 import {
+  memo,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -99,14 +100,20 @@ function clampFontSize(n: number): number {
   return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, Math.round(n)));
 }
 
-function ContentItemView({ item, scale, presentationId }: ItemProps) {
-  const selectedId = useEditorStore((s) => s.selectedContentId);
-  const editingId = useEditorStore((s) => s.editingContentId);
+const ContentItemView = memo(function ContentItemView({
+  item,
+  scale,
+  presentationId,
+}: ItemProps) {
+  // Derived boolean selectors. Zustand only re-renders when the *result*
+  // changes (=== compare), so an item that isn't this one being selected/
+  // deselected doesn't bounce this component. Without this, every selection
+  // change rerendered every content item on the page.
+  const isSelected = useEditorStore((s) => s.selectedContentId === item.id);
+  const isEditing = useEditorStore((s) => s.editingContentId === item.id);
   const selectContent = useEditorStore((s) => s.selectContent);
   const beginEdit = useEditorStore((s) => s.beginEdit);
 
-  const isSelected = selectedId === item.id;
-  const isEditing = editingId === item.id;
   const isText = item.type === 'text';
 
   const actions = useEditorActions(presentationId);
@@ -285,7 +292,7 @@ function ContentItemView({ item, scale, presentationId }: ItemProps) {
       )}
     </div>
   );
-}
+});
 
 /**
  * Renders an image or video content item by fetching its Media record

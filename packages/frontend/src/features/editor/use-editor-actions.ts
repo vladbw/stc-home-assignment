@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import {
   DEFAULT_TEXT_STYLE,
   type ContentResponse,
@@ -16,14 +17,18 @@ import { useHistoryStore, type Command } from '../../stores/history-store';
 /**
  * Unified action layer for the editor.
  *
- * Components used to call mutations directly; now they call these methods
- * instead. Each method:
+ * Each method:
  *  1. Computes the *inverse* command (what would undo this).
  *  2. Fires the mutation (forward).
  *  3. Pushes the {forward, inverse} pair onto the undo stack.
  *
  * `undo()` / `redo()` simply pop and execute. Because commands are pure
  * data, redo replays the exact same operation that was originally requested.
+ *
+ * The returned methods and the returned object are memoized so consumers
+ * that pass these to `React.memo`-wrapped children don't see spurious prop
+ * changes on every render. The dependencies (`*.mutate` from TanStack
+ * Query, Zustand store actions) are guaranteed-stable across renders.
  */
 export function useEditorActions(presentationId: string) {
   const createContent = useCreateContent(presentationId);
@@ -37,93 +42,117 @@ export function useEditorActions(presentationId: string) {
   const pushUndo = useHistoryStore((s) => s.pushUndo);
   const pushRedo = useHistoryStore((s) => s.pushRedo);
 
-  const execute = (cmd: Command) => {
-    switch (cmd.type) {
-      case 'createContent':
-        createContent.mutate({ pageId: cmd.pageId, input: cmd.input });
-        return;
-      case 'deleteContent':
-        deleteContent.mutate(cmd.id);
-        return;
-      case 'updateContent':
-        updateContent.mutate({ id: cmd.id, input: cmd.input });
-        return;
-      case 'updatePage':
-        updatePage.mutate({ id: cmd.id, input: cmd.input });
-        return;
-    }
-  };
+  // TanStack Query promises `mutate` is stable across renders, so depending
+  // on it is safe — useCallback won't re-create on every parent re-render.
+  const createMutate = createContent.mutate;
+  const deleteMutate = deleteContent.mutate;
+  const updateContentMutate = updateContent.mutate;
+  const updatePageMutate = updatePage.mutate;
+
+  const execute = useCallback(
+    (cmd: Command) => {
+      switch (cmd.type) {
+        case 'createContent':
+          createMutate({ pageId: cmd.pageId, input: cmd.input });
+          return;
+        case 'deleteContent':
+          deleteMutate(cmd.id);
+          return;
+        case 'updateContent':
+          updateContentMutate({ id: cmd.id, input: cmd.input });
+          return;
+        case 'updatePage':
+          updatePageMutate({ id: cmd.id, input: cmd.input });
+          return;
+      }
+    },
+    [createMutate, deleteMutate, updateContentMutate, updatePageMutate],
+  );
 
   /**
    * Add a content item. If the caller doesn't supply an id, we generate one
    * here — needed so undo→redo round trips re-create the row with the same
    * id, keeping later history commands referring to the correct row.
-   *
-   * Note: we accept the full `CreateContentInput` (where id is already
-   * optional) rather than `Omit<..., 'id'>`, because `Omit` collapses a
-   * discriminated union into a single member with only the common keys.
    */
-  const addContent = (pageId: string, input: CreateContentInput): string => {
-    const id = input.id ?? crypto.randomUUID();
-    const inputWithId: CreateContentInput = { ...input, id };
-    const forward: Command = { type: 'createContent', pageId, input: inputWithId };
-    const inverse: Command = { type: 'deleteContent', id };
-    execute(forward);
-    pushHistory({ forward, inverse });
-    return id;
-  };
+  const addContent = useCallback(
+    (pageId: string, input: CreateContentInput): string => {
+      const id = input.id ?? crypto.randomUUID();
+      const inputWithId: CreateContentInput = { ...input, id };
+      const forward: Command = { type: 'createContent', pageId, input: inputWithId };
+      const inverse: Command = { type: 'deleteContent', id };
+      execute(forward);
+      pushHistory({ forward, inverse });
+      return id;
+    },
+    [execute, pushHistory],
+  );
 
-  const removeContent = (item: ContentResponse) => {
-    const forward: Command = { type: 'deleteContent', id: item.id };
-    const inverse: Command = {
-      type: 'createContent',
-      pageId: item.pageId,
-      input: contentToCreateInput(item),
-    };
-    execute(forward);
-    pushHistory({ forward, inverse });
-  };
+  const removeContent = useCallback(
+    (item: ContentResponse) => {
+      const forward: Command = { type: 'deleteContent', id: item.id };
+      const inverse: Command = {
+        type: 'createContent',
+        pageId: item.pageId,
+        input: contentToCreateInput(item),
+      };
+      execute(forward);
+      pushHistory({ forward, inverse });
+    },
+    [execute, pushHistory],
+  );
 
-  const patchContent = (item: ContentResponse, patch: UpdateContentInput) => {
-    const forward: Command = { type: 'updateContent', id: item.id, input: patch };
-    const inverse: Command = {
-      type: 'updateContent',
-      id: item.id,
-      input: inverseUpdate(item, patch),
-    };
-    execute(forward);
-    pushHistory({ forward, inverse });
-  };
+  const patchContent = useCallback(
+    (item: ContentResponse, patch: UpdateContentInput) => {
+      const forward: Command = { type: 'updateContent', id: item.id, input: patch };
+      const inverse: Command = {
+        type: 'updateContent',
+        id: item.id,
+        input: inverseUpdate(item, patch),
+      };
+      execute(forward);
+      pushHistory({ forward, inverse });
+    },
+    [execute, pushHistory],
+  );
 
-  const patchPage = (
-    page: { id: string; backgroundColor: string },
-    patch: UpdatePageInput,
-  ) => {
-    const inversePatch: UpdatePageInput = {};
-    if (patch.backgroundColor !== undefined) {
-      inversePatch.backgroundColor = page.backgroundColor;
-    }
-    const forward: Command = { type: 'updatePage', id: page.id, input: patch };
-    const inverse: Command = { type: 'updatePage', id: page.id, input: inversePatch };
-    execute(forward);
-    pushHistory({ forward, inverse });
-  };
+  const patchPage = useCallback(
+    (
+      page: { id: string; backgroundColor: string },
+      patch: UpdatePageInput,
+    ) => {
+      const inversePatch: UpdatePageInput = {};
+      if (patch.backgroundColor !== undefined) {
+        inversePatch.backgroundColor = page.backgroundColor;
+      }
+      const forward: Command = { type: 'updatePage', id: page.id, input: patch };
+      const inverse: Command = { type: 'updatePage', id: page.id, input: inversePatch };
+      execute(forward);
+      pushHistory({ forward, inverse });
+    },
+    [execute, pushHistory],
+  );
 
-  const undo = () => {
+  const undo = useCallback(() => {
     const action = popUndo();
     if (!action) return;
     execute(action.inverse);
     pushRedo(action);
-  };
+  }, [execute, popUndo, pushRedo]);
 
-  const redo = () => {
+  const redo = useCallback(() => {
     const action = popRedo();
     if (!action) return;
     execute(action.forward);
     pushUndo(action);
-  };
+  }, [execute, popRedo, pushUndo]);
 
-  return { addContent, removeContent, patchContent, patchPage, undo, redo };
+  // Object identity is stable as long as the individual callbacks are. This
+  // lets `React.memo` consumers that take `actions` (or anything derived
+  // from it) skip re-renders cleanly.
+  return useMemo(
+    () => ({ addContent, removeContent, patchContent, patchPage, undo, redo }),
+    [addContent, removeContent, patchContent, patchPage, undo, redo],
+  );
 }
 
 /**
