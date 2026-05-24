@@ -34,7 +34,7 @@ sts-project/
 
 - To run the app locally: the backend depends on an AWS account + Neon for the db and it can only run locally if these are configured in your local .env file (will provide an example later). However, it is easy to run just the frontend locally and have it point to production for backend operations.
 
-- To do this, go to vite.config.ts and set the api proxy to https://stc-home-assignment-frontend.vercel.app
+- To do this, go to vite.config.js and set the api proxy to https://stc-home-assignment-frontend.vercel.app
 
 - Then run the frontend locally:
 
@@ -44,6 +44,8 @@ npm install
 npm run dev
 ```
 
-- Now the app should be running, we just need to point its api url to the production one.
+- Now the app should be running in your browser.
+
+
 - Default local backend: http://localhost:3000
 - Default local frontend: http://localhost:5173
