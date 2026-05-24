@@ -32,9 +32,9 @@ sts-project/
 
 - The app has already been deployed (both backend and frontend), so it can already be accessed in the browser at https://stc-home-assignment-frontend.vercel.app
 
-- To run the app locally: the backend depends on an AWS account + Neon for the db and it can only run locally if these are configured in your local .env file (will provide an example later). However, it is easy to run just the frontend locally and have it point to production for backend operations.
+- To run the app locally: the backend depends on an AWS bucket + Neon for the db and it can only run locally if these are configured in your local .env file. However, it is easy to run just the frontend locally and have it point to production for backend operations.
 
-- To do this, go to vite.config.js and set the api proxy to https://stc-home-assignment-frontend.vercel.app
+- To do this, go to vite.config.js and set the api proxy to https://stc-home-assignment-frontend.vercel.app (the app will run regardless of this step, but the request to fetch presentations will fail)
 
 - Then run the frontend locally:
 
@@ -45,6 +45,18 @@ npm run dev
 ```
 
 - Now the app should be running in your browser.
+
+- In order to run the backend locally, the app needs an .env file with the connection string and the AWS setup. I have attached a .env-example file; if you are curious to run the backend on your computer, create your own .env file next to the .env-example and populate it with your own data following the pattern.
+
+- After that:
+```bash
+cd packages/backend
+npm install
+npm run db:generate
+npm run db:migrate
+npm run dev
+```
+
 
 
 - Default local backend: http://localhost:3000
