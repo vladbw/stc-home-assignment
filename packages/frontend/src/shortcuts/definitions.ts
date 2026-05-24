@@ -12,16 +12,18 @@ import type { ShortcutDef } from './types';
  */
 export const SHORTCUTS = {
   // Home -----------------------------------------------------------------
+  // Note: ⌘N alone is reserved by every browser ("New Window") and can't be
+  // intercepted reliably. Adding Alt sidesteps the conflict on every OS.
   'home.newPresentation': {
     scope: 'home',
-    chord: { key: 'n', modifiers: ['mod'] },
+    chord: { key: '.', modifiers: ['mod'] },
     description: 'New presentation',
   },
 
   // Editor ---------------------------------------------------------------
   'editor.newPage': {
     scope: 'editor',
-    chord: { key: 'n', modifiers: ['mod'] },
+    chord: { key: '.', modifiers: ['mod'] },
     description: 'New page',
   },
   'editor.undo': {
@@ -30,16 +32,12 @@ export const SHORTCUTS = {
     description: 'Undo',
     allowRepeat: true,
   },
+  // ⌘⇧Z / Ctrl+Shift+Z is the cross-platform redo chord. ⌘Y was dropped
+  // because Chrome and Firefox bind it to the History panel on macOS.
   'editor.redo': {
     scope: 'editor',
     chord: { key: 'z', modifiers: ['mod', 'shift'] },
     description: 'Redo',
-    allowRepeat: true,
-  },
-  'editor.redoAlt': {
-    scope: 'editor',
-    chord: { key: 'y', modifiers: ['mod'] },
-    description: 'Redo (Windows)',
     allowRepeat: true,
   },
   'editor.prevPage': {

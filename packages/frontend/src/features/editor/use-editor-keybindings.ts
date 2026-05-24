@@ -65,7 +65,6 @@ export function useEditorKeybindings(
   });
   useShortcut('editor.undo', actions.undo, { enabled: () => canUndo });
   useShortcut('editor.redo', actions.redo, { enabled: () => canRedo });
-  useShortcut('editor.redoAlt', actions.redo, { enabled: () => canRedo });
   useShortcut('editor.prevPage', () => navigatePage(-1));
   useShortcut('editor.nextPage', () => navigatePage(1));
   useShortcut('editor.deleteSelected', deleteSelected, {

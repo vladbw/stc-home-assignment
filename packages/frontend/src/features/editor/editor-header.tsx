@@ -22,7 +22,7 @@ export function EditorHeader({ presentation }: Props) {
       </h1>
       <Link
         to={`/presentations/${presentation.id}/present`}
-        className={buttonVariants({ variant: 'primary' })}
+        className={buttonVariants({ variant: 'ghost' })}
       >
         ▶ Present
       </Link>

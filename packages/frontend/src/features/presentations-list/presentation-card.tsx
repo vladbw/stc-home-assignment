@@ -12,7 +12,10 @@ import {
 
 const presentationCardClass = cn(
   cardVariants({ variant: 'interactive', padding: 'md' }),
-  'grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center',
+  // Two-column grid at every size so the actions column sits to the right
+  // of the card content (filling the otherwise-empty space on mobile).
+  // Vertical centering kicks in only at sm+ where the action row stays flat.
+  'grid grid-cols-[1fr_auto] items-start gap-4 sm:items-center ',
 );
 
 type Props = {
@@ -69,7 +72,7 @@ export function PresentationCard({ presentation }: Props) {
           onChange={(e) => setDraftTitle(e.target.value)}
           maxLength={200}
         />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button type="submit" disabled={rename.isPending} variant="primary">
             Save
           </Button>
@@ -94,10 +97,10 @@ export function PresentationCard({ presentation }: Props) {
           <p className='text-foreground'>
             {presentation.pageCount} {presentation.pageCount === 1 ? 'page' : 'pages'}
           </p>
-          <p>Created at {new Date(presentation.createdAt).toLocaleString()}</p>
+          <p>Created at {new Date(presentation.createdAt).toLocaleDateString()}</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 flex-col">
         <Button type="button" onClick={() => setRenaming(true)}>
           Rename
         </Button>
