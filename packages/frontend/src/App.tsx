@@ -3,14 +3,14 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { queryClient } from './services/query-client';
-import { PresentationsListRoute } from './routes/presentations-list-route';
+import { PresentationsListPage } from './pages/presentations-list-page';
 
-// The editor and presentation js is only loaded on demand
-const EditorRoute = lazy(() =>
-  import('./routes/editor-route').then((m) => ({ default: m.EditorRoute })),
+// The editor/presentation js is only loaded on demand
+const PresentationEditorPage = lazy(() =>
+  import('./pages/presentation-editor-page').then((m) => ({ default: m.PresentationEditorPage })),
 );
-const PresentationRoute = lazy(() =>
-  import('./routes/presentation-route').then((m) => ({ default: m.PresentationRoute })),
+const PresentationViewerPage = lazy(() =>
+  import('./pages/presentation-viewer-page').then((m) => ({ default: m.PresentationViewerPage })),
 );
 
 function RouteFallback() {
@@ -27,9 +27,9 @@ export function App() {
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/" element={<PresentationsListRoute />} />
-            <Route path="/presentations/:id" element={<EditorRoute />} />
-            <Route path="/presentations/:id/present" element={<PresentationRoute />} />
+            <Route path="/" element={<PresentationsListPage />} />
+            <Route path="/presentations/:id" element={<PresentationEditorPage />} />
+            <Route path="/presentations/:id/present" element={<PresentationViewerPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

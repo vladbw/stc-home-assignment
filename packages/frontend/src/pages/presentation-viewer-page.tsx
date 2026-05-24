@@ -13,9 +13,11 @@ import { usePresentationDetail } from '../queries/presentations';
 import { useShortcut } from '../shortcuts/use-shortcut';
 import { useEditorStore } from '../stores/editor-store';
 import { useFitScale } from '../features/editor/use-fit-scale';
-import styles from './presentation-route.module.css';
+import styles from './presentation-viewer.module.css';
 
-export function PresentationRoute() {
+
+// The page where we view (in presentation mode) a given presentation
+export function PresentationViewerPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: presentation, isLoading, error } = usePresentationDetail(id);

@@ -10,7 +10,9 @@ import { PageShell } from '../components/ui/page-shell';
 import { useEditorStore } from '../stores/editor-store';
 import { useHistoryStore } from '../stores/history-store';
 
-export function EditorRoute() {
+
+// The page where we can edit the contents of a presentation
+export function PresentationEditorPage() {
   const { id } = useParams<{ id: string }>();
   const { data: presentation, isLoading, error } = usePresentationDetail(id);
 

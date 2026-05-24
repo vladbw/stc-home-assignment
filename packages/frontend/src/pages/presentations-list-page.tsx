@@ -5,7 +5,8 @@ import {
   WorkspaceHeader,
 } from '../features/presentations-list';
 
-export function PresentationsListRoute() {
+// The landing page, where the list of presentations is shown
+export function PresentationsListPage() {
   return (
     <PageShell>
       <PageContent>
