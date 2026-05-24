@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useDebouncedCommit } from '../../lib/use-debounced-commit';
+import { useDebouncedCommit } from '../lib/use-debounced-commit';
 
 type Props = {
   value: string;

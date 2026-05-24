@@ -5,7 +5,7 @@ import {
   DEFAULT_TEXT_STYLE,
   type PageResponse,
 } from '@sts/shared';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../generic-components/button';
 import { useEditorStore } from '../../../stores/editor-store';
 import { fitDimensionsToBox } from '../media-dimensions';
 import { MediaPicker, type PickedMedia } from '../media-picker';

@@ -1,8 +1,7 @@
-import { Card } from '../../components/ui/card';
+import { Card } from '../../generic-components/card';
 import { usePresentations } from '../../queries/presentations';
 import { PresentationCard } from './presentation-card';
 
-/** Renders the list of existing presentations (or a loading/empty state). */
 export function PresentationsGrid() {
   const { data, isLoading, error } = usePresentations();
 

@@ -6,7 +6,7 @@ import { ToolbarHistoryGroup } from './history-group';
 import { ToolbarTextStyleGroup } from './text-style-group';
 import { SidebarToggleButton } from '../sidebar-toggle-button';
 import { useEditorActions } from '../use-editor-actions';
-import { DebouncedColorPicker } from '../../../components/ui/debounced-color-picker';
+import { DebouncedColorPicker } from '../../../generic-components/debounced-color-picker';
 
 type Props = {
   presentationId: string;

@@ -1,4 +1,4 @@
-import { Button } from '../../components/ui/button';
+import { Button } from '../../generic-components/button';
 import { useEditorStore } from '../../stores/editor-store';
 
 /**

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { PresentationListItem } from '@sts/shared';
-import { Button } from '../../components/ui/button';
-import { cardVariants } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
+import { Button } from '../../generic-components/button';
+import { cardVariants } from '../../generic-components/card';
+import { Input } from '../../generic-components/input';
 import { cn } from '../../lib/cn';
 import {
   useDeletePresentation,
@@ -12,15 +12,15 @@ import {
 
 const presentationCardClass = cn(
   cardVariants({ variant: 'interactive', padding: 'md' }),
-  // Two-column grid at every size so the actions column sits to the right
-  // of the card content (filling the otherwise-empty space on mobile).
-  // Vertical centering kicks in only at sm+ where the action row stays flat.
   'grid grid-cols-[1fr_auto] items-start gap-4 sm:items-center ',
 );
 
 type Props = {
   presentation: PresentationListItem;
 };
+
+// Card showing information (title, created, no pages) of an existing presentation,
+// also acts as a link to open the editor view.
 
 export function PresentationCard({ presentation }: Props) {
   const [renaming, setRenaming] = useState(false);

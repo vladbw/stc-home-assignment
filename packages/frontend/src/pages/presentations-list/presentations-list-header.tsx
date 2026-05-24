@@ -1,5 +1,4 @@
-/** Page header for the presentations-list route. */
-export function WorkspaceHeader() {
+export function PresentationsListHeader() {
   return (
     <header className="mb-8 flex flex-col gap-3 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div>

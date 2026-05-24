@@ -1,5 +1,5 @@
 import { type ContentResponse } from '@sts/shared';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../generic-components/button';
 import { useEditorStore } from '../../../stores/editor-store';
 import { useEditorActions } from '../use-editor-actions';
 

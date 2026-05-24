@@ -3,11 +3,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { queryClient } from './services/query-client';
-import { PresentationsListPage } from './pages/presentations-list-page';
+import { PresentationsListPage } from './pages/presentations-list/presentations-list-page';
 
 // The editor/presentation js is only loaded on demand
 const PresentationEditorPage = lazy(() =>
-  import('./pages/presentation-editor-page').then((m) => ({ default: m.PresentationEditorPage })),
+  import('./pages/presentation-editor/presentation-editor-page').then((m) => ({ default: m.PresentationEditorPage })),
 );
 const PresentationViewerPage = lazy(() =>
   import('./pages/presentation-viewer-page').then((m) => ({ default: m.PresentationViewerPage })),

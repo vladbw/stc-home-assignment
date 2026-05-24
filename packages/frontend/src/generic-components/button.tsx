@@ -1,8 +1,9 @@
 import { type ButtonHTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../../lib/cn';
-import { formatShortcut } from '../../shortcuts/format';
-import type { ShortcutId } from '../../shortcuts/definitions';
+import { cn } from '../lib/cn';
+
+import { formatShortcut } from '../shortcuts';
+import type { ShortcutId } from '../shortcuts/definitions';
 
 export const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 rounded-control text-sm font-medium no-underline transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/15 disabled:cursor-not-allowed disabled:opacity-45',

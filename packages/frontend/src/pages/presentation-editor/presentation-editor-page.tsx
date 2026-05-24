@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { usePresentationDetail } from '../queries/presentations';
-import { EditorHeader } from '../features/editor/editor-header';
-import { EditorWorkspace } from '../features/editor/editor-workspace';
-import { Toolbar } from '../features/editor/toolbar';
-import { useEditorKeybindings } from '../features/editor/use-editor-keybindings';
-import { buttonVariants } from '../components/ui/button';
-import { PageShell } from '../components/ui/page-shell';
-import { useEditorStore } from '../stores/editor-store';
-import { useHistoryStore } from '../stores/history-store';
+import { usePresentationDetail } from '../../queries/presentations';
+import { EditorHeader } from '../../features/editor/editor-header';
+import { EditorWorkspace } from '../../features/editor/editor-workspace';
+import { Toolbar } from '../../features/editor/toolbar';
+import { useEditorKeybindings } from '../../features/editor/use-editor-keybindings';
+import { buttonVariants } from '../../generic-components/button';
+import { PageShell } from '../../generic-components/page-shell';
+import { useEditorStore } from '../../stores/editor-store';
+import { useHistoryStore } from '../../stores/history-store';
 
 
 // The page where we can edit the contents of a presentation

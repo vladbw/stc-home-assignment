@@ -3,8 +3,8 @@ import {
   type ContentResponse,
   type TextStyle,
 } from '@sts/shared';
-import { Button } from '../../../components/ui/button';
-import { DebouncedColorPicker } from '../../../components/ui/debounced-color-picker';
+import { Button } from '../../../generic-components/button';
+import { DebouncedColorPicker } from '../../../generic-components/debounced-color-picker';
 import { useEditorActions } from '../use-editor-actions';
 
 type Props = {

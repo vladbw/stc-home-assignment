@@ -1,5 +1,5 @@
 import { type HTMLAttributes, type ReactNode } from 'react';
-import { cn } from '../../lib/cn';
+import { cn } from '../lib/cn';
 
 type PageShellProps = HTMLAttributes<HTMLElement> & {
   children: ReactNode;

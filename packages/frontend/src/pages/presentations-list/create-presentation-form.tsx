@@ -1,17 +1,13 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import toast from 'react-hot-toast';
-import { Button } from '../../components/ui/button';
-import { cardVariants } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
+import { Button } from '../../generic-components/button';
+import { cardVariants } from '../../generic-components/card';
+import { Input } from '../../generic-components/input';
 import { cn } from '../../lib/cn';
 import { useCreatePresentation } from '../../queries/presentations';
 import { useShortcut } from '../../shortcuts/use-shortcut';
 
-/**
- * Title input + submit button for creating a new presentation. Owns the
- * `home.newPresentation` shortcut binding so the chord is wired wherever
- * this form mounts.
- */
+
 export function CreatePresentationForm() {
   const [title, setTitle] = useState('');
   const { isPending, mutate: createPresentation } = useCreatePresentation();

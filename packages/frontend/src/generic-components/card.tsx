@@ -1,6 +1,6 @@
 import { type HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../../lib/cn';
+import { cn } from '../lib/cn';
 
 export const cardVariants = cva(
   'rounded-card border border-border bg-panel text-foreground shadow-panel',

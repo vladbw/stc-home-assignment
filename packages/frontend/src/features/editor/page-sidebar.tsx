@@ -1,6 +1,6 @@
 import { MAX_PAGES_PER_PRESENTATION, type PresentationDetail } from '@sts/shared';
 import { useAddPage, useDeletePage } from '../../queries/pages';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../generic-components/button';
 import { cn } from '../../lib/cn';
 import { useEditorStore } from '../../stores/editor-store';
 
