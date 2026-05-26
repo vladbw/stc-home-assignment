@@ -61,3 +61,34 @@ npm run dev
 
 - Default local backend: http://localhost:3000
 - Default local frontend: http://localhost:5173
+
+## Keyboard shortcuts per page
+
+
+### Presentations list (home)
+
+| Shortcut       | Action               |
+| -------------- | -------------------- |
+| `Ctrl/Cmd + .` | New presentation     |
+
+### Editor
+
+| Shortcut               | Action                       |
+| ---------------------- | ---------------------------- |
+| `Ctrl/Cmd + .`         | New page                     |
+| `Ctrl/Cmd + Z`         | Undo                         |
+| `Ctrl/Cmd + Shift + Z` | Redo                         |
+| `←`                    | Previous page                |
+| `→`                    | Next page                    |
+| `Delete`               | Delete selected content      |
+| `Backspace`            | Delete selected content      |
+| `Esc`                  | Deselect                     |
+
+### Presentation mode
+
+| Shortcut    | Action            |
+| ----------- | ----------------- |
+| `←`         | Previous slide    |
+| `→`         | Next slide        |
+| `Space`     | Next slide        |
+| `Esc`       | Exit presentation |
